@@ -1,0 +1,738 @@
+import { useState, useEffect, useRef } from "react";
+
+// ─── 초기 데이터 ───────────────────────────────────────────────────────────────
+const generateAccountCode = () => {
+  const n = () => Math.floor(Math.random() * 10);
+  const a = () => String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  return `${n()}${n()}${n()}${a()}${a()}`;
+};
+
+const INITIAL_STATE = {
+  users: {
+    admin: {
+      password: "admin",
+      role: "admin", // admin | sub-admin | user
+      accountCode: generateAccountCode(),
+      balance: 1000000,
+      transactions: [],
+      seenCode: false,
+    },
+  },
+  currency: { name: "원", symbol: "₩" },
+  notices: [],
+  ads: [],
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem("bank_state");
+    return s ? JSON.parse(s) : INITIAL_STATE;
+  } catch {
+    return INITIAL_STATE;
+  }
+}
+function saveState(s) {
+  localStorage.setItem("bank_state", JSON.stringify(s));
+}
+
+// ─── 유틸 ──────────────────────────────────────────────────────────────────────
+const fmt = (n, cur) =>
+  `${cur.symbol}${Number(n).toLocaleString("ko-KR")}`;
+
+const now = () => new Date().toLocaleString("ko-KR");
+
+// ─── 컴포넌트 ──────────────────────────────────────────────────────────────────
+export default function App() {
+  const [state, setState] = useState(loadState);
+  const [page, setPage] = useState("login"); // login | register | home | transfer | history | balance | admin | notice
+  const [currentUser, setCurrentUser] = useState(null);
+  const [noticeDetail, setNoticeDetail] = useState(null);
+
+  // popups
+  const [newCodePopup, setNewCodePopup] = useState(null); // account code on register
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  // form states
+  const [loginForm, setLoginForm] = useState({ id: "", pw: "" });
+  const [regForm, setRegForm] = useState({ id: "", pw: "" });
+  const [transferForm, setTransferForm] = useState({ to: "", amount: "", memo: "" });
+  const [transferErr, setTransferErr] = useState("");
+  const [transferOk, setTransferOk] = useState(false);
+
+  // admin forms
+  const [subAdminId, setSubAdminId] = useState("");
+  const [currencyForm, setCurrencyForm] = useState({ name: "", symbol: "" });
+  const [noticeForm, setNoticeForm] = useState({ title: "", content: "" });
+  const [noticePopup, setNoticePopup] = useState(false);
+  const [adFile, setAdFile] = useState(null);
+  const [adLink, setAdLink] = useState("");
+  const [adminMsg, setAdminMsg] = useState("");
+
+  const adInputRef = useRef();
+
+  useEffect(() => { saveState(state); }, [state]);
+
+  const mutate = (fn) => setState(prev => {
+    const next = JSON.parse(JSON.stringify(prev));
+    fn(next);
+    return next;
+  });
+
+  const user = currentUser ? state.users[currentUser] : null;
+
+  // ── 로그인 ──
+  const handleLogin = () => {
+    const u = state.users[loginForm.id];
+    if (!u || u.password !== loginForm.pw) {
+      alert("아이디 또는 비밀번호가 틀렸습니다.");
+      return;
+    }
+    setCurrentUser(loginForm.id);
+    setLoginForm({ id: "", pw: "" });
+    setPage("home");
+  };
+
+  // ── 회원가입 ──
+  const handleRegister = () => {
+    if (!regForm.id || !regForm.pw) { alert("아이디와 비밀번호를 입력하세요."); return; }
+    if (state.users[regForm.id]) { alert("이미 존재하는 아이디입니다."); return; }
+    const code = generateAccountCode();
+    mutate(s => {
+      s.users[regForm.id] = {
+        password: regForm.pw,
+        role: "user",
+        accountCode: code,
+        balance: 0,
+        transactions: [],
+        seenCode: false,
+      };
+    });
+    setNewCodePopup(code);
+    setCurrentUser(regForm.id);
+    setRegForm({ id: "", pw: "" });
+    setPage("home");
+  };
+
+  // ── 송금 ──
+  const handleTransfer = () => {
+    setTransferErr("");
+    setTransferOk(false);
+    const amt = Number(transferForm.amount);
+    if (!transferForm.to || !amt) { setTransferErr("계좌번호와 금액을 입력하세요."); return; }
+    const toEntry = Object.entries(state.users).find(([, v]) => v.accountCode === transferForm.to);
+    if (!toEntry) { setTransferErr("존재하지 않는 계좌번호입니다."); return; }
+    if (amt > user.balance) { setTransferErr("잔액이 부족합니다."); return; }
+    const toId = toEntry[0];
+    const ts = now();
+    mutate(s => {
+      s.users[currentUser].balance -= amt;
+      s.users[currentUser].transactions.push({
+        type: "sent", to: toId, toCode: transferForm.to,
+        amount: amt, memo: transferForm.memo, time: ts,
+      });
+      s.users[toId].balance += amt;
+      s.users[toId].transactions.push({
+        type: "received", from: currentUser, fromCode: s.users[currentUser].accountCode,
+        amount: amt, memo: transferForm.memo, time: ts,
+      });
+    });
+    setTransferForm({ to: "", amount: "", memo: "" });
+    setTransferOk(true);
+  };
+
+  // ── 공지 작성 ──
+  const handleNotice = () => {
+    if (!noticeForm.title) { alert("제목을 입력하세요."); return; }
+    mutate(s => {
+      s.notices.unshift({ id: Date.now(), title: noticeForm.title, content: noticeForm.content, time: now() });
+    });
+    setNoticeForm({ title: "", content: "" });
+    setNoticePopup(false);
+    setAdminMsg("공지가 등록되었습니다.");
+  };
+
+  // ── 광고 업로드 ──
+  const handleAd = () => {
+    if (!adFile) { alert("이미지를 선택하세요."); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      mutate(s => {
+        s.ads.push({ id: Date.now(), src: e.target.result, link: adLink });
+      });
+      setAdFile(null);
+      setAdLink("");
+      if (adInputRef.current) adInputRef.current.value = "";
+      setAdminMsg("광고가 업로드되었습니다.");
+    };
+    reader.readAsDataURL(adFile);
+  };
+
+  // ── 준관리자 임명 ──
+  const handleSubAdmin = () => {
+    if (!subAdminId) { alert("아이디를 입력하세요."); return; }
+    if (!state.users[subAdminId]) { alert("존재하지 않는 사용자입니다."); return; }
+    mutate(s => { s.users[subAdminId].role = "sub-admin"; });
+    setSubAdminId("");
+    setAdminMsg(`${subAdminId}님이 준관리자로 임명되었습니다.`);
+  };
+
+  // ── 통화 수정 ──
+  const handleCurrency = () => {
+    if (!currencyForm.name || !currencyForm.symbol) { alert("단위명과 기호를 입력하세요."); return; }
+    mutate(s => { s.currency = { name: currencyForm.name, symbol: currencyForm.symbol }; });
+    setCurrencyForm({ name: "", symbol: "" });
+    setAdminMsg("통화 단위가 변경되었습니다.");
+  };
+
+  const isAdmin = user && (user.role === "admin" || user.role === "sub-admin");
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════════════
+  return (
+    <div style={styles.root}>
+      {/* ── 헤더 (로그인 후) */}
+      {currentUser && (
+        <header style={styles.header}>
+          <div style={styles.logo} onClick={() => setPage("home")}>🏦 NOVA BANK</div>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <button style={styles.navBtn} onClick={() => setPage("home")}>홈</button>
+            <div style={{ position: "relative" }}>
+              <button style={styles.profileBtn} onClick={() => setProfileOpen(p => !p)}>
+                👤 {currentUser}
+              </button>
+              {profileOpen && (
+                <div style={styles.profileCard}>
+                  <div style={styles.profileRow}><b>아이디</b>{currentUser}</div>
+                  <div style={styles.profileRow}><b>역할</b>{user.role === "admin" ? "관리자" : user.role === "sub-admin" ? "준관리자" : "일반 사용자"}</div>
+                  <div style={styles.profileRow}><b>계좌번호</b><span style={{ letterSpacing: 2 }}>{user.accountCode}</span></div>
+                  <div style={styles.profileRow}><b>잔액</b>{fmt(user.balance, state.currency)}</div>
+                  <button style={styles.logoutBtn} onClick={() => { setCurrentUser(null); setPage("login"); setProfileOpen(false); }}>
+                    로그아웃
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+      )}
+
+      {/* ══ 신규 계좌 팝업 */}
+      {newCodePopup && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <div style={styles.modalTitle}>🎉 계좌가 생성되었습니다</div>
+            <p style={{ color: "#8b9ab8", marginBottom: 8 }}>아래 코드가 당신의 계좌번호입니다.<br />안전한 곳에 보관하세요.</p>
+            <div style={styles.codeBox}>{newCodePopup}</div>
+            <p style={{ color: "#aaa", fontSize: 12, marginTop: 8 }}>이 창을 닫으면 다시 표시되지 않습니다.<br />오른쪽 위 프로필에서 재확인할 수 있습니다.</p>
+            <button style={styles.primaryBtn} onClick={() => {
+              mutate(s => { s.users[currentUser].seenCode = true; });
+              setNewCodePopup(null);
+            }}>확인 (X)</button>
+          </div>
+        </div>
+      )}
+
+      {/* ══ 공지 작성 팝업 */}
+      {noticePopup && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <div style={styles.modalTitle}>📢 공지 작성</div>
+            <input style={styles.input} placeholder="제목" value={noticeForm.title}
+              onChange={e => setNoticeForm(p => ({ ...p, title: e.target.value }))} />
+            <textarea style={{ ...styles.input, height: 120, resize: "vertical" }}
+              placeholder="내용" value={noticeForm.content}
+              onChange={e => setNoticeForm(p => ({ ...p, content: e.target.value }))} />
+            <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+              <button style={styles.primaryBtn} onClick={handleNotice}>작성</button>
+              <button style={styles.ghostBtn} onClick={() => setNoticePopup(false)}>취소</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ 공지 상세 */}
+      {noticeDetail && (
+        <div style={styles.overlay}>
+          <div style={{ ...styles.modal, maxWidth: 520 }}>
+            <div style={styles.modalTitle}>{noticeDetail.title}</div>
+            <div style={{ color: "#8b9ab8", fontSize: 12, marginBottom: 12 }}>{noticeDetail.time}</div>
+            <div style={{ color: "#c8d0e4", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{noticeDetail.content}</div>
+            <button style={{ ...styles.ghostBtn, marginTop: 16 }} onClick={() => setNoticeDetail(null)}>닫기</button>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════ PAGES ═══════════════════════════════════ */}
+      <main style={styles.main}>
+
+        {/* ── 로그인 */}
+        {page === "login" && (
+          <div style={styles.authCard}>
+            <div style={styles.authLogo}>🏦</div>
+            <h1 style={styles.authTitle}>NOVA BANK</h1>
+            <p style={styles.authSub}>안전하고 빠른 인터넷 뱅킹</p>
+            <input style={styles.input} placeholder="아이디" value={loginForm.id}
+              onChange={e => setLoginForm(p => ({ ...p, id: e.target.value }))}
+              onKeyDown={e => e.key === "Enter" && handleLogin()} />
+            <input style={styles.input} type="password" placeholder="비밀번호" value={loginForm.pw}
+              onChange={e => setLoginForm(p => ({ ...p, pw: e.target.value }))}
+              onKeyDown={e => e.key === "Enter" && handleLogin()} />
+            <button style={styles.primaryBtn} onClick={handleLogin}>로그인</button>
+            <button style={styles.ghostBtn} onClick={() => setPage("register")}>회원가입</button>
+            <NoticeBanner notices={state.notices} onDetail={setNoticeDetail} />
+            <AdBanner ads={state.ads} />
+          </div>
+        )}
+
+        {/* ── 회원가입 */}
+        {page === "register" && (
+          <div style={styles.authCard}>
+            <div style={styles.authLogo}>🏦</div>
+            <h1 style={styles.authTitle}>회원가입</h1>
+            <p style={styles.authSub}>NOVA BANK에 오신 것을 환영합니다</p>
+            <input style={styles.input} placeholder="아이디" value={regForm.id}
+              onChange={e => setRegForm(p => ({ ...p, id: e.target.value }))} />
+            <input style={styles.input} type="password" placeholder="비밀번호" value={regForm.pw}
+              onChange={e => setRegForm(p => ({ ...p, pw: e.target.value }))} />
+            <button style={styles.primaryBtn} onClick={handleRegister}>가입하기</button>
+            <button style={styles.ghostBtn} onClick={() => setPage("login")}>← 로그인으로</button>
+          </div>
+        )}
+
+        {/* ── 홈 */}
+        {page === "home" && user && (
+          <div style={styles.pageWrap}>
+            <div style={styles.balanceHero}>
+              <div style={styles.balanceLabel}>현재 잔액</div>
+              <div style={styles.balanceAmount}>{fmt(user.balance, state.currency)}</div>
+              <div style={styles.balanceAccount}>계좌 · {user.accountCode}</div>
+            </div>
+            <div style={styles.menuGrid}>
+              <MenuCard icon="💸" label="송금하기" onClick={() => { setTransferErr(""); setTransferOk(false); setPage("transfer"); }} />
+              <MenuCard icon="📋" label="이체내역" onClick={() => setPage("history")} />
+              <MenuCard icon="💰" label="잔액조회" onClick={() => setPage("balance")} />
+            </div>
+            {isAdmin && (
+              <div style={{ textAlign: "center", marginTop: 40 }}>
+                <span style={styles.adminLink} onClick={() => { setAdminMsg(""); setPage("admin"); }}>
+                  관리자
+                </span>
+              </div>
+            )}
+            <NoticeBanner notices={state.notices} onDetail={setNoticeDetail} />
+            <AdBanner ads={state.ads} />
+          </div>
+        )}
+
+        {/* ── 송금 */}
+        {page === "transfer" && user && (
+          <div style={styles.pageWrap}>
+            <PageBack onBack={() => setPage("home")} title="송금하기" />
+            <div style={styles.card}>
+              <label style={styles.label}>받는 계좌번호</label>
+              <input style={styles.input} placeholder="예: 123AB" value={transferForm.to}
+                onChange={e => setTransferForm(p => ({ ...p, to: e.target.value.toUpperCase() }))} />
+              <label style={styles.label}>이체 금액</label>
+              <input style={styles.input} type="number" placeholder="금액 입력" value={transferForm.amount}
+                onChange={e => setTransferForm(p => ({ ...p, amount: e.target.value }))} />
+              <label style={styles.label}>이체 요약 <span style={{ color: "#666" }}>(상대방에게 표시)</span></label>
+              <input style={styles.input} placeholder="예: 밥값 등" value={transferForm.memo}
+                onChange={e => setTransferForm(p => ({ ...p, memo: e.target.value }))} />
+              {transferErr && <div style={styles.errMsg}>⚠ {transferErr}</div>}
+              {transferOk && <div style={styles.okMsg}>✓ 송금이 완료되었습니다.</div>}
+              <button style={styles.primaryBtn} onClick={handleTransfer}>송금하기</button>
+            </div>
+            <NoticeBanner notices={state.notices} onDetail={setNoticeDetail} />
+            <AdBanner ads={state.ads} />
+          </div>
+        )}
+
+        {/* ── 이체내역 */}
+        {page === "history" && user && (
+          <div style={styles.pageWrap}>
+            <PageBack onBack={() => setPage("home")} title="이체내역" />
+            {user.transactions.length === 0
+              ? <div style={styles.emptyMsg}>이체 내역이 없습니다.</div>
+              : [...user.transactions].reverse().map((tx, i) => (
+                <div key={i} style={{ ...styles.txBlock, borderLeft: `4px solid ${tx.type === "sent" ? "#e05c5c" : "#4caf50"}` }}>
+                  <div style={styles.txTop}>
+                    <span style={{ color: tx.type === "sent" ? "#e05c5c" : "#4caf50", fontWeight: 700 }}>
+                      {tx.type === "sent" ? "▼ 보냄" : "▲ 받음"}
+                    </span>
+                    <span style={{ color: "#8b9ab8", fontSize: 12 }}>{tx.time}</span>
+                  </div>
+                  <div style={styles.txAmount}>
+                    {tx.type === "sent" ? "-" : "+"}{fmt(tx.amount, state.currency)}
+                  </div>
+                  <div style={styles.txMeta}>
+                    {tx.type === "sent"
+                      ? `→ ${tx.toCode} (${tx.to})`
+                      : `← ${tx.fromCode} (${tx.from})`}
+                  </div>
+                  {tx.memo && <div style={styles.txMemo}>"{tx.memo}"</div>}
+                </div>
+              ))
+            }
+            <NoticeBanner notices={state.notices} onDetail={setNoticeDetail} />
+            <AdBanner ads={state.ads} />
+          </div>
+        )}
+
+        {/* ── 잔액조회 */}
+        {page === "balance" && user && (
+          <div style={styles.pageWrap}>
+            <PageBack onBack={() => setPage("home")} title="잔액조회" />
+            <div style={styles.balanceCard}>
+              <div style={styles.balanceLabel}>현재 잔액</div>
+              <div style={{ ...styles.balanceAmount, fontSize: 44 }}>{fmt(user.balance, state.currency)}</div>
+              <div style={styles.balanceAccount}>계좌번호 : {user.accountCode}</div>
+            </div>
+            <NoticeBanner notices={state.notices} onDetail={setNoticeDetail} />
+            <AdBanner ads={state.ads} />
+          </div>
+        )}
+
+        {/* ── 관리자 */}
+        {page === "admin" && isAdmin && (
+          <div style={styles.pageWrap}>
+            <PageBack onBack={() => setPage("home")} title="관리자 페이지" />
+            {adminMsg && <div style={styles.okMsg}>{adminMsg}</div>}
+
+            {/* 준관리자 임명 */}
+            <AdminSection title="👑 준관리자 임명">
+              {user.role === "sub-admin"
+                ? <div style={styles.errMsg}>권한이 없습니다.</div>
+                : <>
+                  <input style={styles.input} placeholder="사용자 아이디" value={subAdminId}
+                    onChange={e => setSubAdminId(e.target.value)} />
+                  <button style={styles.primaryBtn} onClick={handleSubAdmin}>임명하기</button>
+                </>
+              }
+            </AdminSection>
+
+            {/* 통화 단위 수정 */}
+            <AdminSection title="💱 통화 단위 수정">
+              <div style={{ display: "flex", gap: 8 }}>
+                <input style={{ ...styles.input, flex: 1 }} placeholder="단위명 (예: 달러)" value={currencyForm.name}
+                  onChange={e => setCurrencyForm(p => ({ ...p, name: e.target.value }))} />
+                <input style={{ ...styles.input, flex: 1 }} placeholder="기호 (예: $)" value={currencyForm.symbol}
+                  onChange={e => setCurrencyForm(p => ({ ...p, symbol: e.target.value }))} />
+              </div>
+              <div style={{ color: "#8b9ab8", fontSize: 12, marginBottom: 6 }}>
+                현재: {state.currency.symbol} ({state.currency.name})
+              </div>
+              <button style={styles.primaryBtn} onClick={handleCurrency}>변경하기</button>
+            </AdminSection>
+
+            {/* 회원 목록 (보안 미적용이므로 열람 가능) */}
+            <AdminSection title="👥 회원 목록">
+              <div style={{ overflowX: "auto" }}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      {["아이디", "비밀번호", "역할", "계좌번호", "잔액"].map(h => (
+                        <th key={h} style={styles.th}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(state.users).map(([id, u]) => (
+                      <tr key={id}>
+                        <td style={styles.td}>{id}</td>
+                        <td style={styles.td}>{u.password}</td>
+                        <td style={styles.td}>{u.role === "admin" ? "관리자" : u.role === "sub-admin" ? "준관리자" : "일반"}</td>
+                        <td style={styles.td}><code>{u.accountCode}</code></td>
+                        <td style={styles.td}>{fmt(u.balance, state.currency)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </AdminSection>
+
+            {/* 공지 작성 */}
+            <AdminSection title="📢 공지 작성">
+              <button style={styles.primaryBtn} onClick={() => setNoticePopup(true)}>공지 작성하기</button>
+            </AdminSection>
+
+            {/* 광고 업로드 */}
+            <AdminSection title="📸 광고 업로드">
+              <input ref={adInputRef} style={styles.fileInput} type="file" accept="image/*"
+                onChange={e => setAdFile(e.target.files[0])} />
+              <input style={styles.input} placeholder="링크 (선택)" value={adLink}
+                onChange={e => setAdLink(e.target.value)} />
+              <button style={styles.primaryBtn} onClick={handleAd}>업로드</button>
+            </AdminSection>
+
+            <NoticeBanner notices={state.notices} onDetail={setNoticeDetail} />
+            <AdBanner ads={state.ads} />
+          </div>
+        )}
+
+        {/* ── 공지 상세 페이지 */}
+        {page === "notice" && noticeDetail && (
+          <div style={styles.pageWrap}>
+            <PageBack onBack={() => { setPage(currentUser ? "home" : "login"); setNoticeDetail(null); }} title="공지사항" />
+            <div style={styles.card}>
+              <h2 style={{ color: "#e8eaf6", marginBottom: 8 }}>{noticeDetail.title}</h2>
+              <div style={{ color: "#8b9ab8", fontSize: 12, marginBottom: 16 }}>{noticeDetail.time}</div>
+              <div style={{ color: "#c8d0e4", lineHeight: 1.9, whiteSpace: "pre-wrap" }}>{noticeDetail.content}</div>
+            </div>
+          </div>
+        )}
+
+      </main>
+    </div>
+  );
+}
+
+// ─── 서브 컴포넌트 ─────────────────────────────────────────────────────────────
+function MenuCard({ icon, label, onClick }) {
+  return (
+    <div style={styles.menuCard} onClick={onClick}
+      onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px) scale(1.02)"}
+      onMouseLeave={e => e.currentTarget.style.transform = "translateY(0) scale(1)"}>
+      <div style={styles.menuIcon}>{icon}</div>
+      <div style={styles.menuLabel}>{label}</div>
+    </div>
+  );
+}
+
+function PageBack({ onBack, title }) {
+  return (
+    <div style={styles.pageHeader}>
+      <button style={styles.backBtn} onClick={onBack}>← 뒤로</button>
+      <h2 style={styles.pageTitle}>{title}</h2>
+    </div>
+  );
+}
+
+function AdminSection({ title, children }) {
+  return (
+    <div style={styles.adminSection}>
+      <h3 style={styles.adminSectionTitle}>{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+function NoticeBanner({ notices, onDetail }) {
+  if (notices.length === 0) return null;
+  const top3 = notices.slice(0, 3);
+  return (
+    <div style={styles.bannerSection}>
+      <div style={styles.bannerTitle}>📢 공지사항</div>
+      {top3.map(n => (
+        <div key={n.id} style={styles.noticeBlock} onClick={() => onDetail(n)}
+          onMouseEnter={e => e.currentTarget.style.background = "#1e2a42"}
+          onMouseLeave={e => e.currentTarget.style.background = "#151f33"}>
+          <span>{n.title}</span>
+          <span style={{ color: "#8b9ab8", fontSize: 11 }}>{n.time}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AdBanner({ ads }) {
+  if (ads.length === 0) return null;
+  return (
+    <div style={styles.bannerSection}>
+      <div style={styles.bannerTitle}>📣 광고</div>
+      <div style={styles.adScroll}>
+        {ads.map(ad => (
+          ad.link
+            ? <a key={ad.id} href={ad.link} target="_blank" rel="noreferrer" style={{ flexShrink: 0 }}>
+              <img src={ad.src} alt="ad" style={styles.adImg} />
+            </a>
+            : <img key={ad.id} src={ad.src} alt="ad" style={{ ...styles.adImg, flexShrink: 0 }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── 스타일 ────────────────────────────────────────────────────────────────────
+const styles = {
+  root: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #0a0f1e 0%, #0d1829 50%, #0a1428 100%)",
+    fontFamily: "'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif",
+    color: "#e8eaf6",
+  },
+  header: {
+    position: "sticky", top: 0, zIndex: 100,
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    padding: "14px 28px",
+    background: "rgba(10,15,30,0.92)", backdropFilter: "blur(12px)",
+    borderBottom: "1px solid #1a2540",
+  },
+  logo: {
+    fontSize: 20, fontWeight: 800, letterSpacing: 1, cursor: "pointer",
+    background: "linear-gradient(90deg, #60a5fa, #818cf8)",
+    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+  },
+  navBtn: {
+    background: "none", border: "none", color: "#8b9ab8", cursor: "pointer",
+    fontSize: 14, padding: "6px 12px", borderRadius: 8,
+    transition: "color 0.2s",
+  },
+  profileBtn: {
+    background: "#1a2540", border: "1px solid #2a3a5c", color: "#c8d0e4",
+    borderRadius: 20, padding: "6px 16px", cursor: "pointer", fontSize: 14,
+  },
+  profileCard: {
+    position: "absolute", right: 0, top: 44, width: 240,
+    background: "#101828", border: "1px solid #1e2e4a", borderRadius: 12,
+    padding: 16, boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+  },
+  profileRow: {
+    display: "flex", justifyContent: "space-between",
+    padding: "8px 0", borderBottom: "1px solid #1a2540",
+    fontSize: 13, color: "#c8d0e4",
+  },
+  logoutBtn: {
+    marginTop: 12, width: "100%", background: "#e05c5c",
+    border: "none", color: "#fff", borderRadius: 8,
+    padding: "8px", cursor: "pointer", fontSize: 13,
+  },
+  main: { padding: "0 0 40px" },
+  authCard: {
+    maxWidth: 400, margin: "60px auto", padding: "40px 32px",
+    background: "rgba(16,24,40,0.9)", borderRadius: 20,
+    border: "1px solid #1a2b44", boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
+    display: "flex", flexDirection: "column", gap: 12,
+  },
+  authLogo: { fontSize: 48, textAlign: "center" },
+  authTitle: {
+    textAlign: "center", fontSize: 28, fontWeight: 900, letterSpacing: 2,
+    background: "linear-gradient(90deg, #60a5fa, #818cf8)",
+    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+    margin: 0,
+  },
+  authSub: { textAlign: "center", color: "#8b9ab8", fontSize: 13, margin: "0 0 8px" },
+  input: {
+    width: "100%", boxSizing: "border-box",
+    background: "#0d1829", border: "1px solid #1e2e4a",
+    color: "#e8eaf6", borderRadius: 10, padding: "12px 14px",
+    fontSize: 14, outline: "none",
+    transition: "border-color 0.2s",
+  },
+  fileInput: {
+    width: "100%", boxSizing: "border-box",
+    background: "#0d1829", border: "1px solid #1e2e4a",
+    color: "#8b9ab8", borderRadius: 10, padding: "10px 14px",
+    fontSize: 13, marginBottom: 8,
+  },
+  primaryBtn: {
+    width: "100%", padding: "13px", borderRadius: 10, border: "none",
+    background: "linear-gradient(90deg, #3b82f6, #6366f1)",
+    color: "#fff", fontWeight: 700, fontSize: 15, cursor: "pointer",
+    transition: "opacity 0.2s",
+  },
+  ghostBtn: {
+    width: "100%", padding: "12px", borderRadius: 10,
+    border: "1px solid #1e2e4a", background: "none",
+    color: "#8b9ab8", fontSize: 14, cursor: "pointer",
+  },
+  pageWrap: { maxWidth: 680, margin: "0 auto", padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16 },
+  pageHeader: { display: "flex", alignItems: "center", gap: 16, marginBottom: 4 },
+  pageTitle: { fontSize: 22, fontWeight: 800, margin: 0 },
+  backBtn: {
+    background: "none", border: "1px solid #1e2e4a", color: "#8b9ab8",
+    borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13,
+  },
+  card: {
+    background: "rgba(16,24,40,0.9)", borderRadius: 16,
+    border: "1px solid #1a2b44", padding: "24px",
+    display: "flex", flexDirection: "column", gap: 10,
+  },
+  label: { color: "#8b9ab8", fontSize: 13, fontWeight: 600 },
+  errMsg: {
+    background: "#2d1010", border: "1px solid #5c2020",
+    color: "#f87171", borderRadius: 8, padding: "10px 14px", fontSize: 13,
+  },
+  okMsg: {
+    background: "#0d2510", border: "1px solid #1a5c30",
+    color: "#4ade80", borderRadius: 8, padding: "10px 14px", fontSize: 13,
+  },
+  balanceHero: {
+    background: "linear-gradient(135deg, #1e3a5f, #1a2b4a)",
+    borderRadius: 20, padding: "36px 28px", textAlign: "center",
+    border: "1px solid #2a4a7a",
+  },
+  balanceLabel: { color: "#8b9ab8", fontSize: 13, marginBottom: 8 },
+  balanceAmount: {
+    fontSize: 52, fontWeight: 900, letterSpacing: -1,
+    background: "linear-gradient(90deg, #60a5fa, #818cf8)",
+    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+  },
+  balanceAccount: { color: "#6b7fa8", fontSize: 13, marginTop: 8, letterSpacing: 2 },
+  balanceCard: {
+    background: "rgba(16,24,40,0.9)", borderRadius: 20,
+    border: "1px solid #1a2b44", padding: "48px 28px", textAlign: "center",
+  },
+  menuGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 },
+  menuCard: {
+    background: "rgba(16,24,40,0.85)", border: "1px solid #1a2b44",
+    borderRadius: 16, padding: "28px 16px", textAlign: "center", cursor: "pointer",
+    transition: "transform 0.2s, box-shadow 0.2s",
+    boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+  },
+  menuIcon: { fontSize: 32, marginBottom: 10 },
+  menuLabel: { fontSize: 14, fontWeight: 700, color: "#c8d0e4" },
+  adminLink: {
+    color: "#4a5a7a", fontSize: 11, cursor: "pointer",
+    textDecoration: "underline", letterSpacing: 1,
+  },
+  adminSection: {
+    background: "rgba(16,24,40,0.85)", borderRadius: 16,
+    border: "1px solid #1a2b44", padding: "20px",
+    display: "flex", flexDirection: "column", gap: 10,
+  },
+  adminSectionTitle: { margin: "0 0 4px", fontSize: 15, fontWeight: 800, color: "#c8d0e4" },
+  table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
+  th: { background: "#0d1829", color: "#8b9ab8", padding: "8px 12px", textAlign: "left", fontWeight: 600 },
+  td: { padding: "8px 12px", borderBottom: "1px solid #1a2540", color: "#c8d0e4" },
+  txBlock: {
+    background: "rgba(16,24,40,0.85)", borderRadius: 12,
+    border: "1px solid #1a2b44", padding: "16px",
+    display: "flex", flexDirection: "column", gap: 6,
+  },
+  txTop: { display: "flex", justifyContent: "space-between", alignItems: "center" },
+  txAmount: { fontSize: 22, fontWeight: 800 },
+  txMeta: { color: "#8b9ab8", fontSize: 12 },
+  txMemo: { color: "#6b7fa8", fontSize: 12, fontStyle: "italic" },
+  emptyMsg: { textAlign: "center", color: "#4a5a7a", padding: "60px 0", fontSize: 14 },
+  overlay: {
+    position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
+    display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999,
+    backdropFilter: "blur(4px)",
+  },
+  modal: {
+    background: "#101828", borderRadius: 20, padding: "36px 32px",
+    border: "1px solid #1e2e4a", maxWidth: 420, width: "90%",
+    display: "flex", flexDirection: "column", gap: 12,
+    boxShadow: "0 32px 80px rgba(0,0,0,0.7)",
+  },
+  modalTitle: { fontSize: 20, fontWeight: 900, textAlign: "center" },
+  codeBox: {
+    background: "#0a0f1e", border: "2px solid #3b82f6",
+    borderRadius: 12, padding: "20px", textAlign: "center",
+    fontSize: 32, fontWeight: 900, letterSpacing: 8,
+    color: "#60a5fa", fontFamily: "monospace",
+  },
+  bannerSection: {
+    marginTop: 24, borderTop: "1px solid #1a2540", paddingTop: 20,
+    display: "flex", flexDirection: "column", gap: 10,
+  },
+  bannerTitle: { color: "#8b9ab8", fontSize: 13, fontWeight: 700, letterSpacing: 1 },
+  noticeBlock: {
+    background: "#151f33", borderRadius: 10, padding: "12px 16px",
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    cursor: "pointer", fontSize: 14, transition: "background 0.2s",
+  },
+  adScroll: { display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 },
+  adImg: { height: 80, borderRadius: 10, objectFit: "cover", cursor: "pointer" },
+};
