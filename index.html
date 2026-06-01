@@ -486,15 +486,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
 .vote-btn:hover{background:var(--surface3);color:var(--text);}
 .vote-btn.voted{background:linear-gradient(90deg,#3b82f6,#6366f1);border-color:#6366f1;color:#fff;}
 /* Election OX Bet */
-.election-ox-section{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:10px;}
-.election-ox-title{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;}
-.election-bet-candidate-list{display:flex;flex-direction:column;gap:6px;}
-.election-bet-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all .2s;}
-.election-bet-item:hover{border-color:var(--border2);background:var(--surface3);}
-.election-bet-item.my-bet{border-color:#6366f1;background:rgba(99,102,241,.07);}
-.election-bet-name{font-size:13px;font-weight:600;color:var(--text);}
-.election-bet-odds{font-size:12px;font-weight:700;color:#f59e0b;}
-.election-bet-pool{font-size:10px;color:var(--text3);}
+
 /* Admin election form */
 .election-add-candidate-form{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:10px;}
 .election-status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;}
@@ -503,6 +495,12 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
 .election-result-winner{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(249,115,22,.1));border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:14px;text-align:center;margin-bottom:12px;}
 .election-result-winner-label{font-size:10px;color:#f59e0b;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
 .election-result-winner-name{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);}
+/* 선거 목록 카드 */
+.election-list-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.election-list-card:hover{border-color:var(--border2);background:var(--surface2);}
+.election-list-card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.election-list-card-title{font-size:14px;font-weight:700;color:var(--text);}
+.election-detail-back{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 </style>
 </head>
 <body>
@@ -694,36 +692,43 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
   <!-- 선거 관리 섹션 -->
   <div class="admin-section" id="admin-election-section">
     <div class="admin-section-title">🗳️ 선거 관리</div>
-    <div class="election-toggle-row">
-      <span style="font-size:13px;font-weight:600;color:var(--text)">선거 메뉴 활성화</span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="election-toggle" onchange="onElectionToggle(this.checked)">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-    <div id="election-admin-form" style="display:none;margin-top:14px">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">선거 정보를 입력하고 후보를 등록하세요.</div>
-      <div class="field-group"><div class="field-label">선거 이름</div><input type="text" id="election-name-input" placeholder="예: 2025 반장 선거"></div>
-      <button class="btn-primary" onclick="saveElectionName()" style="margin-bottom:12px">선거 이름 저장</button>
+    <!-- 선거 목록 -->
+    <div id="admin-elections-list" style="margin-bottom:10px"></div>
+    <button class="btn-primary" onclick="openCreateElectionModal()">+ 새 선거 만들기</button>
+    <!-- 선거 상세 편집 영역 (선택된 선거) -->
+    <div id="admin-election-detail" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--text)" id="admin-election-detail-title">선거명</div>
+        <button class="btn-sm" onclick="closeAdminElectionDetail()">← 목록으로</button>
+      </div>
+      <!-- 공개 토글 -->
+      <div class="election-toggle-row" style="margin-bottom:10px">
+        <span style="font-size:12px;font-weight:600;color:var(--text)">메뉴에 공개</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="election-active-toggle" onchange="onElectionActiveToggle(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <!-- 후보 등록 -->
       <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">후보 등록</div>
       <div class="election-add-candidate-form">
         <div class="field-group"><div class="field-label">후보 이름</div><input type="text" id="cand-name" placeholder="이름"></div>
         <div class="field-group"><div class="field-label">소속 정당</div><input type="text" id="cand-party" placeholder="소속 정당 (예: 무소속)"></div>
         <div class="field-group"><div class="field-label">기호 번호</div><input type="number" id="cand-num" placeholder="예: 1" min="1"></div>
         <div class="field-group"><div class="field-label">전과 사항</div><input type="text" id="cand-criminal" placeholder="없으면 '없음' 입력"></div>
+        <div class="field-group"><div class="field-label">지역구 <span style="color:var(--text3);font-weight:400;font-size:9px">(선택)</span></div><input type="text" id="cand-district" placeholder="예: 서울 강남구 (없으면 공백)"></div>
         <div id="cand-err" class="err-msg" style="display:none"></div>
         <button class="btn-primary" onclick="addCandidate()">후보 추가</button>
       </div>
       <div id="admin-candidates-list" style="margin-top:12px"></div>
+      <!-- 결과 판정 -->
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">⚖️ 선거 결과 판정</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">당선자를 선택하면 선거 결과가 확정되고 베팅 배당금이 지급됩니다.</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">⚖️ 결과 판정</div>
         <div id="election-judge-list"></div>
       </div>
+      <!-- 삭제 -->
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-        <div style="font-size:12px;font-weight:700;color:#ef4444;margin-bottom:6px">🔄 선거 전체 초기화</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">후보, 투표, 베팅, 결과를 모두 삭제하고 새 선거를 시작할 수 있습니다.<br><b style="color:#ef4444">되돌릴 수 없습니다.</b></div>
-        <button class="btn-sm btn-danger" onclick="resetElectionFull()" style="width:100%;padding:10px;font-size:12px">🗑 선거 전체 초기화 (새 선거 시작)</button>
+        <button class="btn-sm btn-danger" onclick="deleteElection()" style="width:100%;padding:10px;font-size:12px">🗑 이 선거 삭제</button>
       </div>
     </div>
   </div>
@@ -1177,8 +1182,19 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
 
 <!-- ELECTION PAGE -->
 <div id="page-election" class="page">
-  <div class="page-header"><button class="back-btn" onclick="goHome()">← 뒤로</button><h2 class="page-title">🗳️ 선거</h2></div>
-  <div id="election-content"></div>
+  <!-- 선거 목록 뷰 -->
+  <div id="election-list-view">
+    <div class="page-header"><button class="back-btn" onclick="goHome()">← 뒤로</button><h2 class="page-title">🗳️ 선거</h2></div>
+    <div id="election-list-content"></div>
+  </div>
+  <!-- 선거 상세 뷰 -->
+  <div id="election-detail-view" style="display:none">
+    <div class="election-detail-back">
+      <button class="back-btn" onclick="closeElectionDetail()">← 목록으로</button>
+      <h2 class="page-title" id="election-detail-page-title">선거</h2>
+    </div>
+    <div id="election-detail-content"></div>
+  </div>
 </div>
 
 
@@ -1262,6 +1278,17 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
     <button class="btn-ghost" onclick="document.getElementById('modal-ox-delete').classList.remove('open')">취소</button>
   </div>
 </div></div>
+<!-- 선거 생성 모달 -->
+<div id="modal-create-election" class="overlay"><div class="modal">
+  <div class="modal-title">🗳️ 새 선거 만들기</div>
+  <div class="field-group"><div class="field-label">선거 이름</div><input type="text" id="new-election-name" placeholder="예: 2025 국회의원 선거" onkeydown="if(event.key==='Enter')doCreateElection()"></div>
+  <div id="create-election-err" class="err-msg" style="display:none"></div>
+  <div style="display:flex;gap:7px;margin-top:8px">
+    <button class="btn-primary" onclick="doCreateElection()">만들기</button>
+    <button class="btn-ghost" onclick="document.getElementById('modal-create-election').classList.remove('open')">취소</button>
+  </div>
+</div></div>
+
 <div id="modal-delete-ad" class="overlay"><div class="modal"><div class="modal-title">🗑 광고 삭제</div><p style="text-align:center;color:var(--text2);font-size:12px;margin-bottom:14px">이 광고를 삭제하시겠습니까?</p><div style="display:flex;gap:7px;margin-top:7px"><button class="btn-primary" style="background:linear-gradient(90deg,#dc2626,#b91c1c)" onclick="confirmDeleteAd()">삭제</button><button class="btn-ghost" onclick="document.getElementById('modal-delete-ad').classList.remove('open')">취소</button></div></div></div>
 
 <!-- Stock: 새 종목 상장 모달 -->
@@ -1336,31 +1363,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
   </div>
 </div></div>
 
-<!-- Election bet modal -->
-<div id="modal-election-bet" class="overlay"><div class="modal">
-  <div class="modal-title">🗳️ 당선 베팅</div>
-  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;text-align:center">
-    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px" id="election-bet-candidate-label">후보명</div>
-    <div style="font-size:12px;color:#f59e0b;font-weight:700" id="election-bet-odds-label">배당률: ×0.0</div>
-    <div style="font-size:11px;color:var(--text3);margin-top:4px" id="election-bet-my-bal">내 잔액: —</div>
-  </div>
-  <div class="field-group">
-    <div class="field-label">베팅 금액</div>
-    <input type="number" id="election-bet-amount" placeholder="베팅할 금액을 입력하세요" step="1" min="1"
-      onkeydown="if(event.key==='Enter')doElectionBet()">
-  </div>
-  <div style="display:flex;gap:6px;margin-bottom:10px">
-    <button class="btn-sm" onclick="electionBetQuick(0.25)">25%</button>
-    <button class="btn-sm" onclick="electionBetQuick(0.5)">50%</button>
-    <button class="btn-sm" onclick="electionBetQuick(0.75)">75%</button>
-    <button class="btn-sm" onclick="electionBetQuick(1)">전액</button>
-  </div>
-  <div id="election-bet-err" class="err-msg" style="display:none"></div>
-  <div style="display:flex;gap:7px;margin-top:7px">
-    <button class="btn-primary" onclick="doElectionBet()">베팅하기</button>
-    <button class="btn-ghost" onclick="document.getElementById('modal-election-bet').classList.remove('open')">취소</button>
-  </div>
-</div></div>
+
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -1396,7 +1399,7 @@ let currentUser=null, currentPage='login', boardTab='notice';
 let viewingPostId=null, viewingPostType=null, editingNoticeId=null, editingCommentKey=null;
 let changingUidFor=null, noticeEditMode=false, deletingUserId=null, deletingAdKey=null, transferMode='send';
 let cooldownTimers={};
-let localDb={ users:{}, currency:{name:'원',symbol:'₩'}, notices:[], ads:[], freePosts:[], seenNotices:{}, election:{active:false,name:'',candidates:{},bets:{},result:null}, stocks:{}, stockEvents:[], stockOrders:{} };
+let localDb={ users:{}, currency:{name:'원',symbol:'₩'}, notices:[], ads:[], freePosts:[], seenNotices:{}, elections:{}, stocks:{}, stockEvents:[], stockOrders:{} };
 
 // theme
 let currentTheme = localStorage.getItem('xtedic_theme')||'dark';
@@ -1425,7 +1428,7 @@ async function initFirebase(){
     onValue(r('ads'),s=>{ localDb.ads=objToArr(s.val()); onLiveUpdate(); });
     onValue(r('freePosts'),s=>{ localDb.freePosts=objToArr(s.val()); onLiveUpdate(); });
     onValue(r('seenNotices'),s=>{ localDb.seenNotices=s.val()||{}; });
-    onValue(r('election'),s=>{ localDb.election=s.val()||{active:false,name:'',candidates:{},bets:{},result:null}; onElectionLiveUpdate(); });
+    onValue(r('elections'),s=>{ localDb.elections=s.val()||{}; onElectionLiveUpdate(); });
     onValue(r('stocks'),s=>{ localDb.stocks=s.val()||{}; onStockLiveUpdate(); });
     onValue(r('stockEvents'),s=>{ localDb.stockEvents=objToArr(s.val()); onStockLiveUpdate(); });
     renderNoticeBanner('login'); renderAdBanner('login');
@@ -1539,7 +1542,7 @@ const MENU_ITEMS = [
   { emoji:'🎰', label:'복권', keywords:'복권 lotto 당첨 번호 추첨 lottery', action:()=>{closeMenu();showPage('lottery');} },
   { emoji:'🎲', label:'도박', keywords:'도박 게임 ox betting gamble 베팅 ox도박 바둑알 홀짝 경주 가위바위보', action:()=>{closeMenu();showPage('gambling');} },
   { emoji:'📈', label:'주식', keywords:'주식 stock 투자 매매 증권 주가 상장 포트폴리오', action:()=>{closeMenu();showPage('stock');} },
-  { emoji:'🗳️', label:'선거', keywords:'선거 투표 후보 election vote 여론조사 당선', action:()=>{if(localDb.election&&localDb.election.active){closeMenu();showPage('election');}}, condition:()=>localDb.election&&localDb.election.active },
+  { emoji:'🗳️', label:'선거', keywords:'선거 투표 후보 election vote 여론조사 당선', action:()=>{closeMenu();showPage('election');}, condition:()=>Object.values(localDb.elections||{}).some(e=>e.active) },
   { emoji:'🚧', label:'기능 준비중', keywords:'준비중 coming soon 기능 준비 예정', action:null },
 ];
 
@@ -1765,18 +1768,7 @@ function renderAdmin(){
   }).join('');
   document.getElementById('admin-msg').style.display='none';
   renderNoticeBanner('admin'); renderAdBanner('admin');
-  // election toggle state
-  const tog = document.getElementById('election-toggle');
-  const adminForm = document.getElementById('election-admin-form');
-  const el = localDb.election||{};
-  if(tog) tog.checked = !!el.active;
-  if(adminForm) adminForm.style.display = el.active ? 'block' : 'none';
-  if(el.active){
-    const nameInput = document.getElementById('election-name-input');
-    if(nameInput && el.name) nameInput.value = el.name;
-    renderAdminCandidateList();
-    renderElectionJudgeList();
-  }
+  renderAdminElectionList();
 }
 function showAdminMsg(msg,isErr=false){ const el=document.getElementById('admin-msg'); el.className=isErr?'err-msg':'ok-msg'; el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',3000); }
 window.doSubAdmin=async function(){
@@ -4711,87 +4703,155 @@ window.openStockEventModal = function(type){
 
 
 // ════════════════════════════
-// ELECTION (선거)
+// ELECTION (선거 - 복수)
 // ════════════════════════════
 
-let electionBettingTarget = null; // { candidateKey, name }
+let currentElectionId = null; // 현재 보고 있는 선거 ID (관리자/이용자 공통)
 
+// ── 라이브 업데이트 ──
 function onElectionLiveUpdate(){
-  const el = localDb.election || {};
-  // menu visibility
+  // 메뉴 버튼: 공개된 선거가 1개라도 있으면 표시
+  const hasActive = Object.values(localDb.elections||{}).some(e=>e.active);
   const menuBtn = document.getElementById('menu-election-btn');
-  if(menuBtn) menuBtn.style.display = el.active ? '' : 'none';
-  // admin toggle sync
-  const tog = document.getElementById('election-toggle');
-  if(tog) tog.checked = !!el.active;
-  const adminForm = document.getElementById('election-admin-form');
-  if(adminForm) adminForm.style.display = el.active ? 'block' : 'none';
-  renderStockAdmin();
-  if(el.active && adminForm && adminForm.style.display !== 'none'){
-    const nameInput = document.getElementById('election-name-input');
-    if(nameInput && el.name) nameInput.value = el.name;
-    renderAdminCandidateList();
-    renderElectionJudgeList();
+  if(menuBtn) menuBtn.style.display = hasActive ? '' : 'none';
+  // 관리자 페이지면 목록 갱신
+  if(currentPage==='admin') renderAdminElectionList();
+  // 선거 페이지면 갱신
+  if(currentPage==='election'){
+    if(currentElectionId && document.getElementById('election-detail-view').style.display!=='none'){
+      renderElectionDetail(currentElectionId);
+    } else {
+      renderElectionListPage();
+    }
   }
-  // if on election page, re-render
-  if(currentPage === 'election') renderElectionPage();
 }
 
-window.onElectionToggle = async function(checked){
-  await update(r('election'), { active: checked });
-  const adminForm = document.getElementById('election-admin-form');
-  if(adminForm) adminForm.style.display = checked ? 'block' : 'none';
-  const menuBtn = document.getElementById('menu-election-btn');
-  if(menuBtn) menuBtn.style.display = checked ? '' : 'none';
+// ════════ 관리자 ════════
+
+// 선거 목록 렌더 (관리자)
+function renderAdminElectionList(){
+  const el=document.getElementById('admin-elections-list'); if(!el)return;
+  const elections=Object.entries(localDb.elections||{});
+  if(!elections.length){ el.innerHTML='<div style="color:var(--text3);font-size:12px;margin-bottom:6px">선거가 없습니다.</div>'; return; }
+  el.innerHTML=elections.map(([id,e])=>{
+    const statusBadge=e.result
+      ?`<span class="election-status-badge election-status-done">🏆 결과확정</span>`
+      :e.active
+        ?`<span class="election-status-badge election-status-open">공개중</span>`
+        :`<span style="font-size:10px;color:var(--text3)">비공개</span>`;
+    const candCount=Object.keys(e.candidates||{}).length;
+    return `<div class="stock-admin-item">
+      <div class="stock-admin-header">
+        <div><div style="font-size:13px;font-weight:700;color:var(--text)">${escHtml(e.name||'(이름없음)')}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px">${statusBadge} · 후보 ${candCount}명</div></div>
+        <button class="btn-sm" onclick="openAdminElectionDetail('${id}')">관리</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// 선거 생성 모달 열기
+window.openCreateElectionModal=function(){
+  document.getElementById('new-election-name').value='';
+  document.getElementById('create-election-err').style.display='none';
+  document.getElementById('modal-create-election').classList.add('open');
+  setTimeout(()=>document.getElementById('new-election-name').focus(),80);
 };
 
-window.saveElectionName = async function(){
-  const name = document.getElementById('election-name-input').value.trim();
-  if(!name){ alert('선거 이름을 입력하세요.'); return; }
-  await update(r('election'), { name });
-  localDb.election.name = name;
-  showAdminMsg('선거 이름이 저장되었습니다.');
-};
-
-window.addCandidate = async function(){
-  const name = document.getElementById('cand-name').value.trim();
-  const party = document.getElementById('cand-party').value.trim();
-  const num = parseInt(document.getElementById('cand-num').value);
-  const criminal = document.getElementById('cand-criminal').value.trim();
-  const errEl = document.getElementById('cand-err');
+// 선거 생성
+window.doCreateElection=async function(){
+  const name=document.getElementById('new-election-name').value.trim();
+  const errEl=document.getElementById('create-election-err');
   errEl.style.display='none';
-  if(!name||!party||!num||!criminal){ errEl.textContent='모든 항목을 입력하세요.'; errEl.style.display='block'; return; }
-  const cands = localDb.election.candidates||{};
-  const dup = Object.values(cands).find(c=>c.num===num);
-  if(dup){ errEl.textContent='같은 기호 번호가 이미 있습니다.'; errEl.style.display='block'; return; }
-  const newRef = push(r('election','candidates'));
-  await set(newRef, { name, party, num, criminal, votes:{} });
-  ['cand-name','cand-party','cand-num','cand-criminal'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
-  const snap = await get(r('election','candidates'));
-  if(!localDb.election) localDb.election={};
-  localDb.election.candidates = snap.val()||{};
+  if(!name){ errEl.textContent='선거 이름을 입력하세요.'; errEl.style.display='block'; return; }
+  const newRef=push(r('elections'));
+  await set(newRef,{name, active:false, candidates:{}, result:null, createdAt:nowStr()});
+  document.getElementById('modal-create-election').classList.remove('open');
+  const snap=await get(r('elections'));
+  localDb.elections=snap.val()||{};
+  renderAdminElectionList();
+  showAdminMsg(`"${name}" 선거가 생성되었습니다.`);
+  // 바로 상세로 이동
+  openAdminElectionDetail(newRef.key);
+};
+
+// 선거 상세 편집 열기
+window.openAdminElectionDetail=function(id){
+  currentElectionId=id;
+  const e=localDb.elections[id]||{};
+  document.getElementById('admin-election-detail').style.display='block';
+  document.getElementById('admin-election-detail-title').textContent=e.name||'(이름없음)';
+  document.getElementById('election-active-toggle').checked=!!e.active;
+  // 후보 입력 초기화
+  ['cand-name','cand-party','cand-num','cand-criminal','cand-district'].forEach(id2=>{const el=document.getElementById(id2);if(el)el.value='';});
+  document.getElementById('cand-err').style.display='none';
+  renderAdminCandidateList();
+  renderElectionJudgeList();
+  // 스크롤
+  document.getElementById('admin-election-detail').scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+window.closeAdminElectionDetail=function(){
+  currentElectionId=null;
+  document.getElementById('admin-election-detail').style.display='none';
+};
+
+// 공개 토글
+window.onElectionActiveToggle=async function(checked){
+  if(!currentElectionId)return;
+  await update(r('elections',currentElectionId),{active:checked});
+  if(!localDb.elections[currentElectionId]) localDb.elections[currentElectionId]={};
+  localDb.elections[currentElectionId].active=checked;
+  renderAdminElectionList();
+  // 메뉴 버튼 업데이트
+  const hasActive=Object.values(localDb.elections||{}).some(e=>e.active);
+  const menuBtn=document.getElementById('menu-election-btn');
+  if(menuBtn) menuBtn.style.display=hasActive?'':'none';
+  showAdminMsg(checked?'선거가 공개되었습니다.':'선거가 비공개로 전환되었습니다.');
+};
+
+// 후보 추가
+window.addCandidate=async function(){
+  if(!currentElectionId)return;
+  const name=document.getElementById('cand-name').value.trim();
+  const party=document.getElementById('cand-party').value.trim();
+  const num=parseInt(document.getElementById('cand-num').value);
+  const criminal=document.getElementById('cand-criminal').value.trim();
+  const district=document.getElementById('cand-district').value.trim();
+  const errEl=document.getElementById('cand-err');
+  errEl.style.display='none';
+  if(!name||!party||!num||!criminal){ errEl.textContent='모든 항목을 입력하세요 (지역구는 선택).'; errEl.style.display='block'; return; }
+  const cands=localDb.elections[currentElectionId]?.candidates||{};
+  if(Object.values(cands).find(c=>c.num===num)){ errEl.textContent='같은 기호 번호가 이미 있습니다.'; errEl.style.display='block'; return; }
+  const newRef=push(r('elections',currentElectionId,'candidates'));
+  await set(newRef,{name,party,num,criminal,district:district||'',votes:{}});
+  ['cand-name','cand-party','cand-num','cand-criminal','cand-district'].forEach(id2=>{const el=document.getElementById(id2);if(el)el.value='';});
+  const snap=await get(r('elections',currentElectionId,'candidates'));
+  localDb.elections[currentElectionId].candidates=snap.val()||{};
   renderAdminCandidateList();
   renderElectionJudgeList();
   showAdminMsg(name+' 후보가 등록되었습니다.');
 };
 
-window.deleteCandidate = async function(key){
-  if(!confirm('이 후보를 삭제하시겠습니까?'))return;
-  await remove(r('election','candidates',key));
-  const snap = await get(r('election','candidates'));
-  if(!localDb.election) localDb.election={};
-  localDb.election.candidates = snap.val()||{};
+// 후보 삭제
+window.deleteCandidate=async function(key){
+  if(!currentElectionId||!confirm('이 후보를 삭제하시겠습니까?'))return;
+  await remove(r('elections',currentElectionId,'candidates',key));
+  const snap=await get(r('elections',currentElectionId,'candidates'));
+  localDb.elections[currentElectionId].candidates=snap.val()||{};
   renderAdminCandidateList();
   renderElectionJudgeList();
   showAdminMsg('후보가 삭제되었습니다.');
 };
 
+// 관리자 후보 목록 렌더
 function renderAdminCandidateList(){
-  const el = document.getElementById('admin-candidates-list'); if(!el)return;
-  const cands = localDb.election?.candidates||{};
-  const arr = Object.entries(cands).sort((a,b)=>a[1].num-b[1].num);
+  const el=document.getElementById('admin-candidates-list'); if(!el)return;
+  if(!currentElectionId){el.innerHTML='';return;}
+  const cands=localDb.elections[currentElectionId]?.candidates||{};
+  const arr=Object.entries(cands).sort((a,b)=>a[1].num-b[1].num);
   if(!arr.length){ el.innerHTML='<div style="color:var(--text3);font-size:12px">등록된 후보가 없습니다.</div>'; return; }
-  el.innerHTML = arr.map(([key,c])=>`
+  el.innerHTML=arr.map(([key,c])=>`
     <div class="election-candidate-card">
       <div class="election-candidate-header">
         <div>
@@ -4802,132 +4862,147 @@ function renderAdminCandidateList(){
         <button class="btn-sm btn-danger" onclick="deleteCandidate('${key}')">삭제</button>
       </div>
       <div class="election-candidate-criminal">전과: <span>${escHtml(c.criminal)}</span></div>
+      ${c.district?`<div style="font-size:11px;color:var(--text3);margin-top:2px">📍 ${escHtml(c.district)}</div>`:''}
     </div>`).join('');
 }
 
+// 결과 판정 목록
 function renderElectionJudgeList(){
-  const el = document.getElementById('election-judge-list'); if(!el)return;
-  const cands = localDb.election?.candidates||{};
-  const result = localDb.election?.result;
+  const el=document.getElementById('election-judge-list'); if(!el)return;
+  if(!currentElectionId){el.innerHTML='';return;}
+  const e=localDb.elections[currentElectionId]||{};
+  const cands=e.candidates||{};
+  const result=e.result;
   if(result){
-    const winner = cands[result.winnerKey];
-    el.innerHTML=`<div class="election-result-winner"><div class="election-result-winner-label">🏆 당선자 확정</div><div class="election-result-winner-name">${winner?escHtml(winner.name):'알 수 없음'}</div></div>
-    <button class="btn-ghost btn-danger" onclick="clearElectionResult()" style="width:100%;margin-top:6px">결과 초기화</button>`;
+    const winner=cands[result.winnerKey];
+    el.innerHTML=`<div class="election-result-winner" style="margin-bottom:8px">
+      <div class="election-result-winner-label">🏆 당선자 확정</div>
+      <div class="election-result-winner-name">${winner?escHtml(winner.name):'알 수 없음'}</div>
+    </div>
+    <button class="btn-ghost btn-danger" onclick="clearElectionResult()" style="width:100%;margin-top:4px">결과 초기화</button>`;
     return;
   }
-  const arr = Object.entries(cands).sort((a,b)=>a[1].num-b[1].num);
-  if(!arr.length){ el.innerHTML='<div style="color:var(--text3);font-size:12px">등록된 후보가 없습니다.</div>'; return; }
-  el.innerHTML = arr.map(([key,c])=>`
+  const arr=Object.entries(cands).sort((a,b)=>a[1].num-b[1].num);
+  if(!arr.length){ el.innerHTML='<div style="color:var(--text3);font-size:12px">후보를 먼저 등록하세요.</div>'; return; }
+  el.innerHTML=arr.map(([key,c])=>`
     <button class="btn-sm btn-success" onclick="judgeElection('${key}')" style="width:100%;text-align:left;margin-bottom:6px;padding:9px 12px;font-size:12px">
       기호 ${c.num} ${escHtml(c.name)} (${escHtml(c.party)}) 당선 확정
     </button>`).join('');
 }
 
-window.judgeElection = async function(winnerKey){
-  if(!confirm('이 후보를 당선자로 확정하시겠습니까? 베팅 배당금이 지급됩니다.'))return;
-  const cands = localDb.election?.candidates||{};
-  const bets = localDb.election?.bets||{};
-  const upd = {};
-  upd['election/result'] = { winnerKey, time: nowStr() };
+// 당선 확정
+window.judgeElection=async function(winnerKey){
+  if(!currentElectionId||!confirm('이 후보를 당선자로 확정하시겠습니까?'))return;
+  await update(r('elections',currentElectionId),{result:{winnerKey,time:nowStr()}});
+  const snap=await get(r('elections',currentElectionId));
+  localDb.elections[currentElectionId]=snap.val();
+  renderAdminElectionList();
+  renderElectionJudgeList();
+  showAdminMsg('당선자가 확정되었습니다.');
+};
 
-  // Payout: collect all bets on winner
-  const winnerBets = {};
-  let winnerPool = 0, totalPool = 0;
-  Object.entries(bets).forEach(([uid, userBets])=>{
-    Object.entries(userBets).forEach(([key, b])=>{
-      totalPool += Number(b.amount)||0;
-      if(key === winnerKey) { winnerPool += Number(b.amount)||0; if(!winnerBets[uid])winnerBets[uid]=0; winnerBets[uid]+= Number(b.amount)||0; }
-    });
-  });
+// 결과 초기화
+window.clearElectionResult=async function(){
+  if(!currentElectionId||!confirm('선거 결과를 초기화하시겠습니까?'))return;
+  await remove(r('elections',currentElectionId,'result'));
+  const snap=await get(r('elections',currentElectionId));
+  localDb.elections[currentElectionId]=snap.val();
+  renderAdminElectionList();
+  renderElectionJudgeList();
+  showAdminMsg('결과가 초기화되었습니다.');
+};
 
-  // Pay winners proportionally
-  if(winnerPool > 0){
-    Object.entries(winnerBets).forEach(([uid, myBet])=>{
-      const ratio = myBet / winnerPool;
-      const payout = Math.floor(totalPool * ratio);
-      const u = localDb.users[uid]; if(!u)return;
-      const curBal = u.balance==='INF'?Infinity:Number(u.balance);
-      if(curBal!==Infinity) upd[`users/${uid}/balance`] = curBal + payout;
-      upd[`users/${uid}/transactions/${Date.now()}_${uid}_elwin`]={type:'received',from:'ELECTION',fromCode:'VOTE',amount:payout,memo:`선거 베팅 당첨 (${escHtml(cands[winnerKey]?.name||'')})`,time:nowStr()};
-    });
+// 선거 삭제
+window.deleteElection=async function(){
+  if(!currentElectionId)return;
+  const e=localDb.elections[currentElectionId]||{};
+  if(!confirm(`"${e.name||'이 선거'}"을(를) 삭제하시겠습니까?\n모든 후보·투표 데이터가 삭제됩니다.`))return;
+  await remove(r('elections',currentElectionId));
+  delete localDb.elections[currentElectionId];
+  currentElectionId=null;
+  document.getElementById('admin-election-detail').style.display='none';
+  renderAdminElectionList();
+  showAdminMsg('선거가 삭제되었습니다.');
+};
+
+// ════════ 이용자 ════════
+
+// 선거 목록 페이지 렌더
+async function renderElectionListPage(){
+  const el=document.getElementById('election-list-content'); if(!el)return;
+  const activeElections=Object.entries(localDb.elections||{}).filter(([,e])=>e.active);
+  if(!activeElections.length){
+    el.innerHTML='<div class="empty-state">현재 진행 중인 선거가 없습니다.</div>';
+    return;
   }
-  await update(ref(db), upd);
-  const snap = await get(r('election'));
-  localDb.election = snap.val()||{};
-  renderAdmin();
-  showAdminMsg('당선자가 확정되었습니다. 배당금이 지급되었습니다.');
+  el.innerHTML=activeElections.map(([id,e])=>{
+    const candCount=Object.keys(e.candidates||{}).length;
+    const totalVotes=Object.values(e.candidates||{}).reduce((s,c)=>s+Object.keys(c.votes||{}).length,0);
+    const statusBadge=e.result
+      ?`<span class="election-status-badge election-status-done">🏆 결과확정</span>`
+      :`<span class="election-status-badge election-status-open">투표 진행중</span>`;
+    return `<div class="election-list-card" onclick="openElectionDetail('${id}')">
+      <div class="election-list-card-header">
+        <div class="election-list-card-title">${escHtml(e.name||'(이름없음)')}</div>
+        ${statusBadge}
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">후보 ${candCount}명 · 총 ${totalVotes}표</div>
+    </div>`;
+  }).join('');
+}
+
+// 선거 상세 열기 (이용자)
+window.openElectionDetail=function(id){
+  currentElectionId=id;
+  document.getElementById('election-list-view').style.display='none';
+  document.getElementById('election-detail-view').style.display='block';
+  const e=localDb.elections[id]||{};
+  document.getElementById('election-detail-page-title').textContent=escHtml(e.name||'선거');
+  renderElectionDetail(id);
 };
 
-window.clearElectionResult = async function(){
-  if(!confirm('선거 결과를 초기화하시겠습니까?'))return;
-  await remove(r('election','result'));
-  const snap = await get(r('election'));
-  localDb.election = snap.val()||{};
-  renderAdmin();
-  showAdminMsg('선거 결과가 초기화되었습니다.');
+window.closeElectionDetail=function(){
+  currentElectionId=null;
+  document.getElementById('election-list-view').style.display='block';
+  document.getElementById('election-detail-view').style.display='none';
+  renderElectionListPage();
 };
 
-// ── Election Page (user view) ──
-async function renderElectionPage(){
-  const el = document.getElementById('election-content'); if(!el)return;
-  const data = localDb.election||{};
-  if(!data.active){ el.innerHTML='<div class="empty-state">현재 진행 중인 선거가 없습니다.</div>'; return; }
+// 선거 상세 렌더 (이용자)
+async function renderElectionDetail(id){
+  const el=document.getElementById('election-detail-content'); if(!el)return;
+  const e=localDb.elections[id]||{};
+  const cands=e.candidates||{};
+  const result=e.result;
+  const arr=Object.entries(cands).sort((a,b)=>a[1].num-b[1].num);
+  let totalVotes=0;
+  arr.forEach(([,c])=>{ totalVotes+=Object.keys(c.votes||{}).length; });
+  const myVote=currentUser?Object.entries(cands).find(([,c])=>c.votes&&c.votes[currentUser]):null;
 
-  const cands = data.candidates||{};
-  const bets = data.bets||{};
-  const result = data.result;
-  const arr = Object.entries(cands).sort((a,b)=>a[1].num-b[1].num);
+  let html='';
+  // 상태 배지
+  html+=result
+    ?`<div style="margin-bottom:12px"><span class="election-status-badge election-status-done">🏆 결과 확정</span></div>`
+    :`<div style="margin-bottom:12px"><span class="election-status-badge election-status-open">투표 진행중</span></div>`;
 
-  // Compute total vote counts & poll %
-  let totalVotes = 0;
-  arr.forEach(([,c])=>{ totalVotes += Object.keys(c.votes||{}).length; });
-
-  // Compute bet pools
-  const betPools = {}; // candidateKey -> total
-  let betTotalAll = 0;
-  arr.forEach(([key])=>{ betPools[key]=0; });
-  Object.values(bets).forEach(userBets=>{
-    Object.entries(userBets).forEach(([key,b])=>{
-      if(betPools[key]!==undefined) betPools[key]+=Number(b.amount)||0;
-      betTotalAll += Number(b.amount)||0;
-    });
-  });
-
-  // My vote & bets
-  const myVote = currentUser ? Object.entries(cands).find(([,c])=>c.votes&&c.votes[currentUser]) : null;
-  const myBetsMap = currentUser&&bets[currentUser] ? bets[currentUser] : {};
-
-  let html = '';
-  // Election name header
-  html += `<div style="margin-bottom:14px">
-    <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">선거 이름</div>
-    <div style="font-size:20px;font-family:'DM Serif Display',serif;color:var(--text)">${escHtml(data.name||'선거')}</div>
-    ${result?`<div style="margin-top:6px"><span class="election-status-badge election-status-done">🏆 결과 확정</span></div>`:`<span class="election-status-badge election-status-open" style="margin-top:6px;display:inline-block">투표 진행중</span>`}
-  </div>`;
-
-  // Result banner
+  // 당선자 배너
   if(result){
-    const winner = cands[result.winnerKey];
-    html += `<div class="election-result-winner" style="margin-bottom:16px">
+    const winner=cands[result.winnerKey];
+    html+=`<div class="election-result-winner" style="margin-bottom:16px">
       <div class="election-result-winner-label">🏆 당선자</div>
       <div class="election-result-winner-name">${winner?escHtml(winner.name):'알 수 없음'}</div>
-      ${winner?`<div style="font-size:12px;color:var(--text2);margin-top:4px">${escHtml(winner.party)}</div>`:''}
+      ${winner?`<div style="font-size:12px;color:var(--text2);margin-top:4px">${escHtml(winner.party)}${winner.district?' · '+escHtml(winner.district):''}</div>`:''}
       <div style="font-size:11px;color:var(--text3);margin-top:4px">${result.time||''}</div>
     </div>`;
   }
 
-  // Candidate cards
+  // 후보 카드
   if(!arr.length){ html+='<div class="empty-state" style="padding:30px 0">등록된 후보가 없습니다.</div>'; }
   arr.forEach(([key,c])=>{
-    const voteCount = Object.keys(c.votes||{}).length;
-    const votePercent = totalVotes>0 ? Math.round(voteCount/totalVotes*100) : 0;
-    const iVoted = c.votes&&c.votes[currentUser];
-    const myBetOnThis = myBetsMap[key];
-    const pool = betPools[key]||0;
-    // odds
-    const odds = betTotalAll>0&&pool>0 ? (betTotalAll/pool).toFixed(2) : '—';
-
-    html += `<div class="election-candidate-card">
+    const voteCount=Object.keys(c.votes||{}).length;
+    const votePercent=totalVotes>0?Math.round(voteCount/totalVotes*100):0;
+    const iVoted=c.votes&&c.votes[currentUser];
+    html+=`<div class="election-candidate-card">
       <div class="election-candidate-header">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <span class="election-candidate-num">${c.num}</span>
@@ -4936,124 +5011,45 @@ async function renderElectionPage(){
           ${iVoted?`<span style="font-size:10px;color:#22c55e;font-weight:700">✓ 투표완료</span>`:''}
         </div>
       </div>
+      ${c.district?`<div style="font-size:11px;color:var(--text3);margin-bottom:4px">📍 ${escHtml(c.district)}</div>`:''}
       <div class="election-candidate-criminal">전과: <span>${escHtml(c.criminal)}</span></div>
-      <!-- 여론조사 바 -->
       <div class="poll-bar-wrap">
         <div class="poll-bar-label"><span>여론조사</span><span>${votePercent}% (${voteCount}표)</span></div>
         <div class="poll-bar-bg"><div class="poll-bar-fill" style="width:${votePercent}%"></div></div>
       </div>`;
-
-    // 투표 버튼 (결과 확정 전 + 미투표시)
-    if(!result && currentUser){
-      if(!myVote){
-        html += `<button class="vote-btn" style="margin-top:10px;width:100%" onclick="castVote('${key}')">이 후보에 투표하기</button>`;
-      }
+    if(!result&&currentUser&&!myVote){
+      html+=`<button class="vote-btn" style="margin-top:10px;width:100%" onclick="castVote('${id}','${key}')">이 후보에 투표하기</button>`;
     }
     if(myVote&&myVote[0]===key){
-      html += `<div style="margin-top:8px;font-size:11px;color:#22c55e;text-align:center">✓ 내가 투표한 후보입니다</div>`;
+      html+=`<div style="margin-top:8px;font-size:11px;color:#22c55e;text-align:center">✓ 내가 투표한 후보입니다</div>`;
     }
-
-    // 베팅 섹션
-    if(!result){
-      html += `<div class="election-ox-section">
-        <div class="election-ox-title">🎰 당선 베팅 · 현재 배당률 ×${odds} · 총 베팅액 ${fmt(pool,localDb.currency)}</div>`;
-      if(myBetOnThis){
-        html += `<div style="font-size:12px;color:#818cf8;margin-bottom:8px">✓ 내 베팅: ${fmt(myBetOnThis.amount,localDb.currency)}</div>`;
-      }
-      if(currentUser){
-        if(!myBetOnThis){
-          html += `<button class="btn-sm" onclick="openElectionBetModal('${key}','${escHtml(c.name)}',${odds})" style="width:100%">이 후보에 베팅하기</button>`;
-        } else {
-          html += `<div style="font-size:11px;color:var(--text3)">이미 베팅하셨습니다.</div>`;
-        }
-      }
-      html += `</div>`;
-    } else {
-      // Show result payout info
-      if(myBetsMap[key]){
-        const isWinner = result.winnerKey===key;
-        html += `<div style="font-size:12px;margin-top:8px;color:${isWinner?'#22c55e':'#ef4444'}">
-          ${isWinner?'🎉 베팅 당첨! 배당금이 지급되었습니다.':'😢 베팅 낙선'}
-        </div>`;
-      }
-    }
-
-    html += `</div>`; // end candidate-card
+    html+=`</div>`;
   });
-
-  el.innerHTML = html;
+  el.innerHTML=html;
 }
 
-window.castVote = async function(candidateKey){
+// 투표
+window.castVote=async function(electionId, candidateKey){
   if(!currentUser){ alert('로그인이 필요합니다.'); return; }
-  const cands = localDb.election?.candidates||{};
-  // Check already voted
-  const alreadyVoted = Object.values(cands).some(c=>c.votes&&c.votes[currentUser]);
-  if(alreadyVoted){ alert('이미 투표하셨습니다. 계정당 1회만 가능합니다.'); return; }
-  await set(r('election','candidates',candidateKey,'votes',currentUser), true);
-  const snap = await get(r('election'));
-  localDb.election = snap.val()||{};
-  renderElectionPage();
+  const e=localDb.elections[electionId]||{};
+  const alreadyVoted=Object.values(e.candidates||{}).some(c=>c.votes&&c.votes[currentUser]);
+  if(alreadyVoted){ alert('이미 투표하셨습니다. 이 선거는 계정당 1회만 가능합니다.'); return; }
+  await set(r('elections',electionId,'candidates',candidateKey,'votes',currentUser),true);
+  const snap=await get(r('elections',electionId));
+  localDb.elections[electionId]=snap.val();
+  renderElectionDetail(electionId);
 };
 
-window.openElectionBetModal = function(candidateKey, name, oddsRaw){
-  electionBettingTarget = { candidateKey, name };
-  document.getElementById('election-bet-candidate-label').textContent = `기호 후보: ${name}`;
-  const oddsStr = (oddsRaw === '—' || !oddsRaw) ? '집계중' : `×${oddsRaw}`;
-  document.getElementById('election-bet-odds-label').textContent = `현재 배당률: ${oddsStr}`;
-  // 내 잔액 표시
-  const u = currentUser ? localDb.users[currentUser] : null;
-  const balStr = u ? fmt(u.balance, localDb.currency) : '—';
-  document.getElementById('election-bet-my-bal').textContent = `내 잔액: ${balStr}`;
-  document.getElementById('election-bet-amount').value = '';
-  document.getElementById('election-bet-err').style.display='none';
-  document.getElementById('modal-election-bet').classList.add('open');
-  setTimeout(()=>document.getElementById('election-bet-amount').focus(), 80);
-};
-
-window.doElectionBet = async function(){
-  if(!currentUser||!electionBettingTarget)return;
-  const amt = parseInt(document.getElementById('election-bet-amount').value);
-  const errEl = document.getElementById('election-bet-err');
-  errEl.style.display='none';
-  if(!amt||amt<=0||!Number.isInteger(amt)){ errEl.textContent='올바른 금액을 입력하세요.'; errEl.style.display='block'; return; }
-  const u = localDb.users[currentUser];
-  const bal = u.balance==='INF'?Infinity:Number(u.balance);
-  if(bal!==Infinity&&amt>bal){ errEl.textContent='잔액이 부족합니다.'; errEl.style.display='block'; return; }
-  // Check already bet on this candidate
-  const existingBet = localDb.election?.bets?.[currentUser]?.[electionBettingTarget.candidateKey];
-  if(existingBet){ errEl.textContent='이미 이 후보에 베팅하셨습니다.'; errEl.style.display='block'; return; }
-  const upd = {};
-  upd[`election/bets/${currentUser}/${electionBettingTarget.candidateKey}`] = { amount: amt, time: nowStr() };
-  if(bal!==Infinity) upd[`users/${currentUser}/balance`] = bal - amt;
-  upd[`users/${currentUser}/transactions/${Date.now()}_elbet`]={ type:'sent', to:'ELECTION', toCode:'VOTE', amount:amt, memo:`선거 베팅 (${electionBettingTarget.name})`, time:nowStr() };
-  await update(ref(db), upd);
-  const snap = await get(r('election'));
-  localDb.election = snap.val()||{};
-  if(bal!==Infinity){ localDb.users[currentUser].balance = bal - amt; updateProfileCard(); }
-  document.getElementById('modal-election-bet').classList.remove('open');
-  renderElectionPage();
-};
-
-// 퀵 베팅 비율
-window.electionBetQuick = function(ratio){
-  const u = currentUser ? localDb.users[currentUser] : null;
-  if(!u) return;
-  const bal = u.balance==='INF' ? 0 : Number(u.balance);
-  const amt = Math.floor(bal * ratio);
-  if(amt > 0) document.getElementById('election-bet-amount').value = amt;
-};
-
-// 선거 전체 초기화
-window.resetElectionFull = async function(){
-  if(!confirm('선거를 완전히 초기화하시겠습니까?\n후보, 투표, 베팅, 결과가 모두 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.')) return;
-  // 선거 데이터 전체 삭제 후 active만 유지
-  await set(r('election'), { active: true, name: '', candidates: {}, bets: {}, result: null });
-  const snap = await get(r('election'));
-  localDb.election = snap.val()||{};
-  renderAdmin();
-  showAdminMsg('선거가 초기화되었습니다. 새 선거를 설정해주세요.');
-};
+// showPage election 진입
+async function renderElectionPage(){
+  currentElectionId=null;
+  document.getElementById('election-list-view').style.display='block';
+  document.getElementById('election-detail-view').style.display='none';
+  // 최신 데이터
+  const snap=await get(r('elections'));
+  localDb.elections=snap.val()||{};
+  renderElectionListPage();
+}
 
 // ── BOOT ──
 initFirebase();
