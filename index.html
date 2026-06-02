@@ -515,6 +515,33 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
 .ipo-status-open{color:#6366f1;font-weight:700;}
 .ipo-status-closed{color:#f59e0b;font-weight:700;}
 .ipo-status-done{color:#22c55e;font-weight:700;}
+/* ── 주식 장시간 배너 ── */
+.market-closed-banner{background:rgba(107,114,128,.12);border:1px solid rgba(107,114,128,.25);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+/* ── 세금/중앙은행/압류 ── */
+.tax-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.tax-label{font-size:12px;color:var(--text);font-weight:600;}
+.tax-sub{font-size:10px;color:var(--text3);margin-top:2px;}
+.tax-input-wrap{display:flex;align-items:center;gap:4px;}
+.tax-input{width:64px;text-align:right;padding:5px 7px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;}
+.seize-badge{display:inline-block;padding:2px 8px;border-radius:8px;background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);font-size:10px;font-weight:700;}
+.cb-broadcast-item{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:5px;}
+.cb-user-check{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);}
+.market-closed-label{color:#9ca3af;font-weight:700;}
+.market-open-label{color:#22c55e;font-weight:700;}
+/* ── 가위바위보 ── */
+.rps-choice-row{display:flex;gap:12px;justify-content:center;margin:16px 0;}
+.rps-choice-btn{flex:1;padding:18px 8px;border-radius:14px;border:2px solid var(--border2);background:var(--surface2);cursor:pointer;font-size:32px;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.rps-choice-btn:hover,.rps-choice-btn:active{transform:scale(1.06);}
+.rps-choice-btn.selected{border-color:#6366f1;background:rgba(99,102,241,.12);}
+.rps-choice-label{font-size:12px;font-weight:700;color:var(--text2);}
+.rps-vs-row{display:flex;align-items:center;justify-content:center;gap:20px;margin:16px 0;}
+.rps-hand{font-size:52px;text-align:center;transition:transform .3s;}
+.rps-hand.shake{animation:rpsShake .1s ease infinite alternate;}
+@keyframes rpsShake{0%{transform:translateY(0)}100%{transform:translateY(-6px)}}
+.rps-result-box{background:var(--surface2);border:2px solid var(--border2);border-radius:14px;padding:18px;text-align:center;margin-top:12px;}
+.rps-result-title{font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:6px;}
+.rps-odds-info{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.rps-odds-badge{font-size:10px;padding:3px 9px;border-radius:8px;background:var(--surface);border:1px solid var(--border2);color:var(--text2);}
 </style>
 </head>
 <body>
@@ -569,10 +596,10 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
       <button class="menu-nav-item" onclick="closeMenu();showPage('board');switchBoardTab('notice')" data-keywords="공지 공지사항 notice announcement 알림"><span class="item-emoji">📢</span>공지사항</button>
       <button class="menu-nav-item" onclick="closeMenu();showPage('board');switchBoardTab('free')" data-keywords="자유 게시판 자유게시판 board post 글 free"><span class="item-emoji">💬</span>자유게시판</button>
       <div class="menu-nav-sep"></div>
-      <button class="menu-nav-item" onclick="closeMenu();showPage('loan')" data-keywords="대출 빚 신용 loan borrow 상환"><span class="item-emoji">🏦</span>대출</button>
-      <button class="menu-nav-item" onclick="closeMenu();showPage('lottery')" data-keywords="복권 lotto 당첨 번호 추첨 lottery"><span class="item-emoji">🎰</span>복권</button>
-      <button class="menu-nav-item" onclick="closeMenu();showPage('gambling')" data-keywords="도박 게임 ox betting gamble 베팅"><span class="item-emoji">🎲</span>도박</button>
-      <button class="menu-nav-item" onclick="closeMenu();showPage('stock')" data-keywords="주식 stock 투자 매매 증권"><span class="item-emoji">📈</span>주식</button>
+      <button class="menu-nav-item" id="menu-loan-btn" onclick="closeMenu();showPage('loan')" data-keywords="대출 빚 신용 loan borrow 상환"><span class="item-emoji">🏦</span>대출</button>
+      <button class="menu-nav-item" id="menu-lottery-btn" onclick="closeMenu();showPage('lottery')" data-keywords="복권 lotto 당첨 번호 추첨 lottery"><span class="item-emoji">🎰</span>복권</button>
+      <button class="menu-nav-item" id="menu-gambling-btn" onclick="closeMenu();showPage('gambling')" data-keywords="도박 게임 ox betting gamble 베팅"><span class="item-emoji">🎲</span>도박</button>
+      <button class="menu-nav-item" id="menu-stock-btn" onclick="closeMenu();showPage('stock')" data-keywords="주식 stock 투자 매매 증권 주가 상장 포트폴리오"><span class="item-emoji">📈</span>주식</button>
       <button class="menu-nav-item" id="menu-election-btn" style="display:none" onclick="closeMenu();showPage('election')" data-keywords="선거 투표 후보 election vote 여론조사"><span class="item-emoji">🗳️</span>선거</button>
       <div class="menu-nav-sep"></div>
       <button class="menu-nav-item disabled" data-keywords="준비중 coming soon 기능" disabled><span class="item-emoji">🚧</span>기능 준비중</button>
@@ -668,33 +695,65 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
 <div id="page-admin" class="page">
   <div class="page-header"><button class="back-btn" onclick="goHome()">← 뒤로</button><h2 class="page-title">관리자 페이지</h2></div>
   <div id="admin-msg" style="display:none"></div>
-  <div class="admin-section"><div class="admin-section-title">👑 준관리자 임명 / 해임</div><div id="sub-admin-content"></div></div>
-  <div class="admin-section">
+  <div class="admin-section" id="admin-sec-subadmin"><div class="admin-section-title">👑 준관리자 임명 / 해임</div><div id="sub-admin-content"></div></div>
+  <div class="admin-section" id="admin-sec-currency">
     <div class="admin-section-title">💱 통화 단위 수정</div>
     <div style="display:flex;gap:7px"><input type="text" id="currency-name" placeholder="단위명 (예: 달러)" style="flex:1"><input type="text" id="currency-symbol" placeholder="기호 (예: $)" style="flex:1"></div>
     <div style="color:var(--text3);font-size:11px;margin:6px 0" id="currency-current"></div>
     <button class="btn-primary" onclick="doCurrency()" style="margin-top:4px">변경하기</button>
   </div>
-  <div class="admin-section">
+  <div class="admin-section" id="admin-sec-users">
     <div class="admin-section-title">👥 회원 목록</div>
     <div style="overflow-x:auto"><table><thead><tr><th>아이디</th><th>비밀번호</th><th>역할</th><th>계좌번호</th><th>잔액</th></tr></thead><tbody id="users-tbody"></tbody></table></div>
   </div>
-  <div class="admin-section"><div class="admin-section-title">📢 공지 작성</div><button class="btn-primary" onclick="openNoticeWrite()">공지 작성하기</button></div>
-  <div class="admin-section">
+  <div class="admin-section" id="admin-sec-notice"><div class="admin-section-title">📢 공지 작성</div><button class="btn-primary" onclick="openNoticeWrite()">공지 작성하기</button></div>
+  <div class="admin-section" id="admin-sec-ad">
     <div class="admin-section-title">📸 광고 업로드</div>
     <input type="file" id="ad-file" accept="image/*" style="margin-bottom:7px;color:var(--text2);font-size:12px">
     <div class="field-group"><input type="text" id="ad-link" placeholder="링크 (선택)"></div>
     <button class="btn-primary" onclick="doAdUpload()">업로드</button>
   </div>
 
+  <!-- 세금 설정 섹션 -->
+  <div class="admin-section" id="admin-sec-tax">
+    <div class="admin-section-title">🏛️ 세금 설정</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">모든 세금은 익스테딕 중앙은행(extedic) 계좌로 자동 납부됩니다.</div>
+    <div class="tax-row">
+      <div><div class="tax-label">💰 소득세</div><div class="tax-sub">송금·지급 수취 시 부과</div></div>
+      <div class="tax-input-wrap"><input type="number" class="tax-input" id="tax-income" min="0" max="99" step="0.1" placeholder="0"><span style="font-size:12px;color:var(--text2)">%</span></div>
+    </div>
+    <div class="tax-row">
+      <div><div class="tax-label">🎲 도박세</div><div class="tax-sub">도박 당첨금에 부과 (OX·바둑알·가위바위보)</div></div>
+      <div class="tax-input-wrap"><input type="number" class="tax-input" id="tax-gambling" min="0" max="99" step="0.1" placeholder="0"><span style="font-size:12px;color:var(--text2)">%</span></div>
+    </div>
+    <div class="tax-row">
+      <div><div class="tax-label">📈 주식 양도세</div><div class="tax-sub">주식 매도 수익에 부과</div></div>
+      <div class="tax-input-wrap"><input type="number" class="tax-input" id="tax-stock" min="0" max="99" step="0.1" placeholder="0"><span style="font-size:12px;color:var(--text2)">%</span></div>
+    </div>
+    <div class="tax-row">
+      <div><div class="tax-label">💸 이체세</div><div class="tax-sub">송금 발신자에게 부과</div></div>
+      <div class="tax-input-wrap"><input type="number" class="tax-input" id="tax-transfer" min="0" max="99" step="0.1" placeholder="0"><span style="font-size:12px;color:var(--text2)">%</span></div>
+    </div>
+    <div class="tax-row" style="border:none">
+      <div><div class="tax-label">🏠 재산세</div><div class="tax-sub">잔액 기준 일괄 부과 · 걷기 버튼으로 수동 징수</div></div>
+      <div class="tax-input-wrap"><input type="number" class="tax-input" id="tax-property" min="0" max="99" step="0.1" placeholder="0"><span style="font-size:12px;color:var(--text2)">%</span></div>
+    </div>
+    <div id="tax-msg" class="ok-msg" style="display:none;margin-top:8px"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-primary" onclick="saveTaxSettings()" style="flex:1">세금 설정 저장</button>
+      <button class="btn-primary" onclick="collectPropertyTax()" style="flex:1;background:linear-gradient(90deg,#f59e0b,#d97706)">🏠 재산세 걷기</button>
+    </div>
+    <div id="property-tax-result" style="display:none;margin-top:8px;font-size:11px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;line-height:1.8"></div>
+  </div>
+
   <!-- 주식 관리 섹션 -->
-  <div class="admin-section">
+  <div class="admin-section" id="admin-sec-stock">
     <div class="admin-section-title">📈 주식 관리</div>
     <div id="stock-admin-list" style="margin-bottom:10px"></div>
     <button class="btn-primary" onclick="openListNewStock()">+ 새 종목 상장</button>
   </div>
   <!-- 이벤트 관리 -->
-  <div class="admin-section">
+  <div class="admin-section" id="admin-sec-event">
     <div class="admin-section-title">📰 주식 이벤트 관리</div>
     <div style="display:flex;gap:7px;margin-bottom:10px">
       <button class="btn-primary" style="flex:1" onclick="openStockEventModal('planned')">📅 계획 이벤트</button>
@@ -932,9 +991,9 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
         <div><div class="prob-game-name">🏇 경주</div><div style="font-size:11px;color:var(--text3);margin-top:2px">준비 중</div></div>
         <span class="prob-game-badge soon">준비중</span>
       </div>
-      <div class="prob-game-item disabled">
-        <div><div class="prob-game-name">✂️ 가위바위보</div><div style="font-size:11px;color:var(--text3);margin-top:2px">준비 중</div></div>
-        <span class="prob-game-badge soon">준비중</span>
+      <div class="prob-game-item" onclick="showRpsGame()">
+        <div><div class="prob-game-name">✂️ 가위바위보</div><div style="font-size:11px;color:var(--text3);margin-top:2px">이기면 3배!</div></div>
+        <span class="prob-game-badge">진행 가능</span>
       </div>
       <div class="prob-game-item disabled">
         <div><div class="prob-game-name">🎩 야바위</div><div style="font-size:11px;color:var(--text3);margin-top:2px">준비 중</div></div>
@@ -982,6 +1041,72 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
             <div id="baduk-result-msg" style="text-align:center;font-size:16px;font-weight:700;margin-top:8px"></div>
             <button class="btn-primary" onclick="resetBadukGame()" style="max-width:200px">다시 하기</button>
           </div>
+        </div>
+      </div>
+    </div>
+    <!-- RPS game view -->
+    <div id="rps-game-view" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-top:14px;margin-bottom:16px">
+        <button class="back-btn" onclick="closeRpsGame()">← 목록으로</button>
+        <h3 style="font-family:'DM Serif Display',serif;font-size:18px">✂️ 가위바위보</h3>
+      </div>
+      <div class="rps-odds-info" style="margin-bottom:12px">
+        <span class="rps-odds-badge">🏆 승리 × 3배</span>
+        <span class="rps-odds-badge">🤝 비김 × 0.75배</span>
+        <span class="rps-odds-badge">😢 패배 베팅금 잃음</span>
+      </div>
+      <div class="card">
+        <div id="rps-phase-bet">
+          <p style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:14px">베팅 후 가위·바위·보 중 하나를 선택하세요.</p>
+          <div class="field-group"><div class="field-label">베팅 금액</div><input type="number" id="rps-bet-input" placeholder="베팅할 금액 (정수)" step="1" min="1" onkeydown="if(event.key==='Enter')startRpsGame()"></div>
+          <div id="rps-bet-err" class="err-msg" style="display:none"></div>
+          <button class="btn-primary" onclick="startRpsGame()">베팅하기</button>
+        </div>
+        <div id="rps-phase-choose" style="display:none">
+          <p style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:4px">무엇을 낼까요?</p>
+          <div class="rps-choice-row">
+            <button class="rps-choice-btn" onclick="doRpsChoose('scissors')">
+              <span>✂️</span><span class="rps-choice-label">가위</span>
+            </button>
+            <button class="rps-choice-btn" onclick="doRpsChoose('rock')">
+              <span>✊</span><span class="rps-choice-label">바위</span>
+            </button>
+            <button class="rps-choice-btn" onclick="doRpsChoose('paper')">
+              <span>🖐</span><span class="rps-choice-label">보</span>
+            </button>
+          </div>
+        </div>
+        <div id="rps-phase-battle" style="display:none">
+          <p style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:10px">대결 중...</p>
+          <div class="rps-vs-row">
+            <div style="text-align:center">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">나</div>
+              <div class="rps-hand shake" id="rps-my-hand">✊</div>
+            </div>
+            <div style="font-size:18px;font-weight:800;color:var(--text3)">VS</div>
+            <div style="text-align:center">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">컴퓨터</div>
+              <div class="rps-hand shake" id="rps-cpu-hand">✊</div>
+            </div>
+          </div>
+        </div>
+        <div id="rps-phase-result" style="display:none">
+          <div class="rps-vs-row">
+            <div style="text-align:center">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">나</div>
+              <div style="font-size:52px" id="rps-result-my-hand"></div>
+            </div>
+            <div style="font-size:18px;font-weight:800;color:var(--text3)">VS</div>
+            <div style="text-align:center">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">컴퓨터</div>
+              <div style="font-size:52px" id="rps-result-cpu-hand"></div>
+            </div>
+          </div>
+          <div class="rps-result-box">
+            <div class="rps-result-title" id="rps-result-title"></div>
+            <div id="rps-result-msg" style="font-size:13px;color:var(--text2);margin-top:6px"></div>
+          </div>
+          <button class="btn-primary" onclick="resetRpsGame()" style="width:100%;margin-top:14px">다시 하기</button>
         </div>
       </div>
     </div>
@@ -1304,6 +1429,39 @@ input:checked+.toggle-slider:before{transform:translateX(20px);}
   </div>
 </div></div>
 
+<!-- 중앙은행 다중송금 모달 -->
+<div id="modal-cb-broadcast" class="overlay"><div class="modal" style="max-height:90vh;overflow-y:auto;overscroll-behavior:contain">
+  <div class="modal-title">📡 다중 송금</div>
+  <div style="font-size:11px;color:var(--text3);margin-bottom:10px">입력한 <b>총액</b>을 선택한 인원수로 나눠 각자에게 송금됩니다. (소수점 버림 후 잔액은 중앙은행으로 환수)</div>
+  <div class="field-group"><div class="field-label">총 송금 금액 (합산)</div><input type="number" id="cb-broadcast-amount" placeholder="총 송금액" min="1" oninput="updateCbSummary()"></div>
+  <div class="field-group"><div class="field-label">메모 (선택)</div><input type="text" id="cb-broadcast-memo" placeholder="예: 기본소득 지급"></div>
+  <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">받을 사용자 선택</div>
+  <div style="margin-bottom:6px;display:flex;gap:6px">
+    <button class="btn-sm" onclick="cbSelectAll(true)">전체 선택</button>
+    <button class="btn-sm" onclick="cbSelectAll(false)">전체 해제</button>
+  </div>
+  <div id="cb-user-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px 8px"></div>
+  <div id="cb-broadcast-summary" style="font-size:11px;color:var(--text3);margin:8px 0"></div>
+  <div id="cb-broadcast-err" class="err-msg" style="display:none"></div>
+  <div style="display:flex;gap:7px;margin-top:8px">
+    <button class="btn-primary" onclick="doCbBroadcast()">송금하기</button>
+    <button class="btn-ghost" onclick="document.getElementById('modal-cb-broadcast').classList.remove('open')">취소</button>
+  </div>
+</div></div>
+
+<!-- 압류 모달 -->
+<div id="modal-seize" class="overlay"><div class="modal">
+  <div class="modal-title">🔒 계좌 압류</div>
+  <div id="seize-target-info" style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:12px;margin-bottom:12px;line-height:1.8"></div>
+  <div class="field-group"><div class="field-label">압류 금액</div><input type="number" id="seize-amount" placeholder="압류할 금액" min="1"></div>
+  <div class="field-group"><div class="field-label">압류 사유</div><input type="text" id="seize-reason" placeholder="예: 탈세 혐의"></div>
+  <div id="seize-err" class="err-msg" style="display:none"></div>
+  <div style="display:flex;gap:7px;margin-top:8px">
+    <button class="btn-primary" style="background:linear-gradient(90deg,#ef4444,#dc2626)" onclick="doSeize()">압류 실행</button>
+    <button class="btn-ghost" onclick="document.getElementById('modal-seize').classList.remove('open')">취소</button>
+  </div>
+</div></div>
+
 <div id="modal-delete-ad" class="overlay"><div class="modal"><div class="modal-title">🗑 광고 삭제</div><p style="text-align:center;color:var(--text2);font-size:12px;margin-bottom:14px">이 광고를 삭제하시겠습니까?</p><div style="display:flex;gap:7px;margin-top:7px"><button class="btn-primary" style="background:linear-gradient(90deg,#dc2626,#b91c1c)" onclick="confirmDeleteAd()">삭제</button><button class="btn-ghost" onclick="document.getElementById('modal-delete-ad').classList.remove('open')">취소</button></div></div></div>
 
 <!-- Stock: 새 종목 상장 모달 -->
@@ -1447,7 +1605,7 @@ let currentUser=null, currentPage='login', boardTab='notice';
 let viewingPostId=null, viewingPostType=null, editingNoticeId=null, editingCommentKey=null;
 let changingUidFor=null, noticeEditMode=false, deletingUserId=null, deletingAdKey=null, transferMode='send';
 let cooldownTimers={};
-let localDb={ users:{}, currency:{name:'원',symbol:'₩'}, notices:[], ads:[], freePosts:[], seenNotices:{}, elections:{}, stocks:{}, stockEvents:[], stockOrders:{}, ipos:{} };
+let localDb={ users:{}, currency:{name:'원',symbol:'₩'}, notices:[], ads:[], freePosts:[], seenNotices:{}, elections:{}, stocks:{}, stockEvents:[], stockOrders:{}, ipos:{}, taxes:{income:0,gambling:0,stock:0,transfer:0,property:0} };
 
 // theme
 let currentTheme = localStorage.getItem('xtedic_theme')||'dark';
@@ -1460,6 +1618,7 @@ function user(){ return currentUser?localDb.users[currentUser]:null; }
 function isAdmin(){ return user()&&user().role==='admin'; }
 function isSubAdmin(){ return user()&&user().role==='sub-admin'; }
 function isMod(){ return user()&&(user().role==='admin'||user().role==='sub-admin'); }
+function isCentralBank(){ return currentUser==='extedic'||user()?.role==='central-bank'; }
 function roleBadge(role){ if(role==='admin')return'<span class="badge badge-admin">관리자</span>'; if(role==='sub-admin')return'<span class="badge badge-sub">준관리자</span>'; return'<span class="badge badge-user">일반</span>'; }
 function objToArr(obj){ if(!obj)return[]; return Object.entries(obj).map(([k,v])=>({...v,_key:k})); }
 
@@ -1468,6 +1627,9 @@ async function initFirebase(){
   try{
     const snap=await get(r('users','admin'));
     if(!snap.exists()){ await set(r('users','admin'),{password:'admin',role:'admin',accountCode:genCode(),balance:'INF',transactions:{},seenCode:true,lastCodeChange:'',lastPwChange:''}); }
+    // 중앙은행 계정 자동 생성
+    const cbSnap=await get(r('users','extedic'));
+    if(!cbSnap.exists()){ await set(r('users','extedic'),{password:'extedic main bank/admin',role:'central-bank',accountCode:'XTDC0001',balance:0,transactions:{},seenCode:true,lastCodeChange:'',lastPwChange:''}); }
     await syncAll();
     document.getElementById('loading-screen').style.display='none';
     onValue(r('users'),s=>{ localDb.users=s.val()||{}; onLiveUpdate(); });
@@ -1480,6 +1642,7 @@ async function initFirebase(){
     onValue(r('stocks'),s=>{ localDb.stocks=s.val()||{}; onStockLiveUpdate(); });
     onValue(r('stockEvents'),s=>{ localDb.stockEvents=objToArr(s.val()); onStockLiveUpdate(); });
     onValue(r('ipos'),s=>{ localDb.ipos=s.val()||{}; onIpoLiveUpdate(); });
+    onValue(r('taxes'),s=>{ localDb.taxes=s.val()||{income:0,gambling:0,stock:0,transfer:0}; });
     renderNoticeBanner('login'); renderAdBanner('login');
   } catch(e){
     document.getElementById('loading-screen').querySelector('p').textContent='연결 실패: '+e.message;
@@ -1514,7 +1677,7 @@ window.showPage=function(name){
   if(name==='home') renderHome();
   if(name==='history') renderHistory();
   if(name==='balance') renderBalance();
-  if(name==='admin') renderAdmin();
+  if(name==='admin'){ if(isMod()||isCentralBank()) renderAdmin(); else goHome(); }
   if(name==='board') renderBoard();
   if(name==='transfer'){ renderNoticeBanner('transfer'); renderAdBanner('transfer'); }
   if(name==='lottery') renderLotteryPage();
@@ -1523,6 +1686,7 @@ window.showPage=function(name){
   if(name==='gambling') renderGamblingPage();
   if(name==='stock') renderStockPage();
   if(name==='election') renderElectionPage();
+  checkSeized();
 };
 window.goHome=()=>currentUser?showPage('home'):showPage('login');
 
@@ -1712,19 +1876,34 @@ function renderHome(){
   document.getElementById('home-account').textContent='계좌 · '+(u.accountCode||'');
   updateProfileCard();
   const menu=document.getElementById('home-menu');
-  if(isAdmin()){
-    menu.innerHTML=`<div class="menu-card" onclick="openTransfer('pay')"><div class="menu-card-icon">💰</div><div class="menu-card-label">지급하기</div></div><div class="menu-card" onclick="openTransfer('confiscate')"><div class="menu-card-icon">🚫</div><div class="menu-card-label">몰수하기</div></div><div class="menu-card" onclick="showPage('history')"><div class="menu-card-icon">📋</div><div class="menu-card-label">이체내역</div></div><div class="menu-card" onclick="showPage('balance')"><div class="menu-card-icon">💰</div><div class="menu-card-label">잔액조회</div></div>`;
+  if(isCentralBank()){
+    menu.innerHTML=`<div class="menu-card" onclick="openCbBroadcast()"><div class="menu-card-icon">📡</div><div class="menu-card-label">다중송금</div></div><div class="menu-card" onclick="showPage('history')"><div class="menu-card-icon">📋</div><div class="menu-card-label">이체내역</div></div><div class="menu-card" onclick="showPage('balance')"><div class="menu-card-icon">💰</div><div class="menu-card-label">잔액조회</div></div>`;
+    menu.style.gridTemplateColumns='repeat(3,1fr)';
+  } else if(isAdmin()){
+    menu.innerHTML=`<div class="menu-card" onclick="openTransfer('pay')"><div class="menu-card-icon">💰</div><div class="menu-card-label">지급하기</div></div><div class="menu-card" onclick="openTransfer('seize')"><div class="menu-card-icon">🔒</div><div class="menu-card-label">압류하기</div></div><div class="menu-card" onclick="showPage('history')"><div class="menu-card-icon">📋</div><div class="menu-card-label">이체내역</div></div><div class="menu-card" onclick="showPage('balance')"><div class="menu-card-icon">💰</div><div class="menu-card-label">잔액조회</div></div>`;
     menu.style.gridTemplateColumns='repeat(2,1fr)';
   } else {
     menu.innerHTML=`<div class="menu-card" onclick="openTransfer('send')"><div class="menu-card-icon">💸</div><div class="menu-card-label">송금하기</div></div><div class="menu-card" onclick="showPage('history')"><div class="menu-card-icon">📋</div><div class="menu-card-label">이체내역</div></div><div class="menu-card" onclick="showPage('balance')"><div class="menu-card-icon">💰</div><div class="menu-card-label">잔액조회</div></div>`;
     menu.style.gridTemplateColumns='repeat(3,1fr)';
   }
-  document.getElementById('admin-link').style.display=isMod()?'block':'none';
+  document.getElementById('admin-link').style.display=(isMod()||isCentralBank())?'block':'none';
+  // 중앙은행 계정: 도박·주식·선거·대출 메뉴 숨기기
+  if(isCentralBank()){
+    ['menu-loan-btn','menu-gambling-btn','menu-stock-btn','menu-election-btn','menu-lottery-btn'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.style.display='none';
+    });
+  } else {
+    // 일반 유저: 원래대로 복원 (선거는 조건부)
+    ['menu-loan-btn','menu-gambling-btn','menu-stock-btn','menu-lottery-btn'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.style.display='';
+    });
+  }
   renderNoticeBanner('home'); renderAdBanner('home');
 }
 
 // ── TRANSFER ──
 window.openTransfer=function(mode){
+  if(mode==='seize'){ openSeizeModal(); return; }
   transferMode=mode;
   ['transfer-err','transfer-ok'].forEach(id=>document.getElementById(id).style.display='none');
   ['transfer-to','transfer-amount','transfer-memo'].forEach(id=>document.getElementById(id).value='');
@@ -1758,10 +1937,15 @@ window.doTransfer=async function(){
     upd[`users/${toId}/balance`]=toBal+amt;
     upd[`users/${currentUser}/transactions/${Date.now()}_s`]={type:'sent',to:toId,toCode,amount:amt,memo,time:ts};
     upd[`users/${toId}/transactions/${Date.now()}_r`]={type:'received',from:currentUser,fromCode:u.accountCode,amount:amt,memo,time:ts};
+    // 이체세 (발신자), 소득세 (수신자)
+    await applyTax(upd,currentUser,amt,'transfer','송금 이체세');
+    await applyTax(upd,toId,amt,'income','송금 소득세');
   } else if(transferMode==='pay'){
     upd[`users/${toId}/balance`]=toBal+amt;
     upd[`users/${currentUser}/transactions/${Date.now()}_p`]={type:'pay',to:toId,toCode,amount:amt,memo,time:ts};
     upd[`users/${toId}/transactions/${Date.now()}_pr`]={type:'pay-received',from:currentUser,fromCode:u.accountCode,amount:amt,memo,time:ts};
+    // 소득세 (수신자)
+    await applyTax(upd,toId,amt,'income','지급 소득세');
   } else if(transferMode==='confiscate'){
     upd[`users/${toId}/balance`]=toBal-amt;
     upd[`users/${currentUser}/transactions/${Date.now()}_c`]={type:'confiscate',to:toId,toCode,amount:amt,memo,time:ts};
@@ -1775,6 +1959,324 @@ window.doTransfer=async function(){
   const labels={send:'송금이',pay:'지급이',confiscate:'몰수가'};
   okEl.textContent=`✓ ${labels[transferMode]} 완료되었습니다.`; okEl.style.display='block';
   updateProfileCard();
+};
+
+
+// ════════════════════════════
+// 헬퍼: 중앙은행 UID
+// ════════════════════════════
+const CB_UID='extedic';
+function getCbBal(){ const cb=localDb.users[CB_UID]; return cb?(cb.balance==='INF'?Infinity:Number(cb.balance)||0):0; }
+
+// ════════════════════════════
+// 세금 설정
+// ════════════════════════════
+function renderTaxSettings(){
+  const t=localDb.taxes||{};
+  ['income','gambling','stock','transfer','property'].forEach(k=>{
+    const el=document.getElementById('tax-'+k);
+    if(el) el.value=t[k]!=null?t[k]:0;
+  });
+}
+
+// 재산세 일괄 징수
+window.collectPropertyTax=async function(){
+  const rate=(localDb.taxes||{}).property||0;
+  if(!rate||rate<=0){ alert('재산세율이 0%입니다. 먼저 세금 설정을 저장하세요.'); return; }
+  if(!confirm(`재산세 ${rate}%를 모든 이용자에게 일괄 징수하시겠습니까?\n(관리자·중앙은행 제외)`))return;
+  const users=Object.entries(localDb.users).filter(([id,u])=>
+    id!==CB_UID && id!=='admin' && u.role!=='admin' && u.role!=='central-bank' && u.balance!=='INF' && Number(u.balance)>0
+  );
+  if(!users.length){ alert('징수 대상 이용자가 없습니다.'); return; }
+  const upd={};
+  const ts=Date.now();
+  let totalCollected=0;
+  const results=[];
+  const cbBal=getCbBal();
+  let cbGain=0;
+  users.forEach(([uid,u],i)=>{
+    const bal=Number(u.balance)||0;
+    const tax=Math.floor(bal*(rate/100));
+    if(tax<=0)return;
+    const newBal=bal-tax;
+    upd[`users/${uid}/balance`]=newBal;
+    upd[`users/${uid}/transactions/${ts+i}_proptax`]={type:'sent',to:CB_UID,toCode:'XTDC0001',amount:tax,memo:`재산세 ${rate}% 납부`,time:nowStr()};
+    cbGain+=tax;
+    totalCollected+=tax;
+    results.push({uid,bal,tax,newBal});
+    localDb.users[uid].balance=newBal;
+  });
+  if(cbBal!==Infinity) upd[`users/${CB_UID}/balance`]=cbBal+cbGain;
+  upd[`users/${CB_UID}/transactions/${ts}_proptax_in`]={type:'received',from:'TAX',fromCode:'TAX',amount:totalCollected,memo:`재산세 ${rate}% 일괄 징수 (${results.length}명)`,time:nowStr()};
+  await update(ref(db),upd);
+  if(cbBal!==Infinity) localDb.users[CB_UID].balance=cbBal+cbGain;
+  updateProfileCard();
+  const resultEl=document.getElementById('property-tax-result');
+  if(resultEl){
+    resultEl.style.display='block';
+    resultEl.innerHTML=`<b>✅ 재산세 징수 완료 (${rate}%)</b><br>
+      총 징수액: <b>${fmt(totalCollected,localDb.currency)}</b> · 대상 ${results.length}명<br>
+      ${results.slice(0,5).map(r=>`${escHtml(r.uid)}: ${fmt(r.bal,localDb.currency)} → ${fmt(r.newBal,localDb.currency)} (−${fmt(r.tax,localDb.currency)})`).join('<br>')}
+      ${results.length>5?`<br>... 외 ${results.length-5}명`:''}`;
+  }
+  const msgEl=document.getElementById('tax-msg');
+  if(msgEl){msgEl.textContent=`재산세 징수 완료: 총 ${fmt(totalCollected,localDb.currency)}`;msgEl.style.display='block';setTimeout(()=>msgEl.style.display='none',4000);}
+};
+
+window.saveTaxSettings=async function(){
+  const t={
+    income: Math.max(0,Math.min(99,Number(document.getElementById('tax-income').value)||0)),
+    gambling: Math.max(0,Math.min(99,Number(document.getElementById('tax-gambling').value)||0)),
+    stock: Math.max(0,Math.min(99,Number(document.getElementById('tax-stock').value)||0)),
+    transfer: Math.max(0,Math.min(99,Number(document.getElementById('tax-transfer').value)||0)),
+    property: Math.max(0,Math.min(99,Number(document.getElementById('tax-property').value)||0)),
+  };
+  await set(r('taxes'),t);
+  localDb.taxes=t;
+  const el=document.getElementById('tax-msg');
+  if(el){el.textContent='세금 설정이 저장되었습니다.';el.style.display='block';setTimeout(()=>el.style.display='none',2500);}
+};
+
+// 세금 계산 헬퍼
+function calcTax(amount, type){
+  const rate=(localDb.taxes||{})[type]||0;
+  return Math.floor(amount * rate / 100);
+}
+
+// 세금을 중앙은행으로 납부 (upd에 추가)
+async function applyTax(upd, uid, amount, type, memo){
+  if(!amount||amount<=0)return 0;
+  const tax=calcTax(amount,type);
+  if(tax<=0)return 0;
+  const uSnap=await get(r('users',uid,'balance'));
+  const uBal=uSnap.val()==='INF'?Infinity:Number(uSnap.val()||0);
+  if(uBal!==Infinity){
+    upd[`users/${uid}/balance`]=(upd[`users/${uid}/balance`]!==undefined?upd[`users/${uid}/balance`]:uBal)-tax;
+  }
+  upd[`users/${uid}/transactions/${Date.now()}_tax_${type}`]={type:'sent',to:CB_UID,toCode:'XTDC0001',amount:tax,memo:`세금 납부 (${memo})`,time:nowStr()};
+  const cbBal=getCbBal();
+  upd[`users/${CB_UID}/balance`]=(upd[`users/${CB_UID}/balance`]!==undefined?upd[`users/${CB_UID}/balance`]:cbBal)+tax;
+  upd[`users/${CB_UID}/transactions/${Date.now()}_taxin_${uid}`]={type:'received',from:uid,fromCode:localDb.users[uid]?.accountCode||'',amount:tax,memo:`세금 수납 (${memo})`,time:nowStr()};
+  return tax;
+}
+
+// ════════════════════════════
+// 중앙은행 다중송금
+// ════════════════════════════
+window.openCbBroadcast=function(){
+  if(!isCentralBank())return;
+  document.getElementById('cb-broadcast-amount').value='';
+  document.getElementById('cb-broadcast-memo').value='';
+  document.getElementById('cb-broadcast-err').style.display='none';
+  // 사용자 목록 렌더
+  const listEl=document.getElementById('cb-user-list');
+  const users=Object.entries(localDb.users).filter(([id])=>id!==CB_UID&&id!=='admin');
+  listEl.innerHTML=users.map(([id,u])=>`
+    <div class="cb-user-check">
+      <input type="checkbox" id="cbchk-${id}" value="${id}" onchange="updateCbSummary()" checked>
+      <label for="cbchk-${id}" style="font-size:12px;cursor:pointer;flex:1">${escHtml(id)} <span style="color:var(--text3);font-size:10px">(${u.accountCode||''})</span></label>
+    </div>`).join('');
+  updateCbSummary();
+  document.getElementById('modal-cb-broadcast').classList.add('open');
+};
+
+window.updateCbSummary=function(){
+  const total=Number(document.getElementById('cb-broadcast-amount').value)||0;
+  const checked=document.querySelectorAll('#cb-user-list input[type=checkbox]:checked').length;
+  const el=document.getElementById('cb-broadcast-summary');
+  if(!el)return;
+  if(!checked||!total){ el.textContent='선택 인원수와 금액을 입력하세요.'; return; }
+  const perPerson=Math.floor(total/checked);
+  const remainder=total-(perPerson*checked);
+  el.innerHTML=`선택 <b>${checked}명</b> · 1인당 <b>${fmt(perPerson,localDb.currency)}</b> · 실제 송금 합계 <b>${fmt(perPerson*checked,localDb.currency)}</b>${remainder>0?` · 잔액 <b style="color:#f59e0b">${fmt(remainder,localDb.currency)}</b> 환수`:''}`;
+};
+
+window.cbSelectAll=function(val){
+  document.querySelectorAll('#cb-user-list input[type=checkbox]').forEach(el=>el.checked=val);
+  updateCbSummary();
+};
+
+window.doCbBroadcast=async function(){
+  const total=Number(document.getElementById('cb-broadcast-amount').value);
+  const memo=document.getElementById('cb-broadcast-memo').value.trim()||'중앙은행 다중송금';
+  const errEl=document.getElementById('cb-broadcast-err');
+  errEl.style.display='none';
+  if(!total||total<=0||!Number.isInteger(total)){errEl.textContent='총 송금액을 정수로 입력하세요.';errEl.style.display='block';return;}
+  const checked=[...document.querySelectorAll('#cb-user-list input[type=checkbox]:checked')].map(el=>el.value);
+  if(!checked.length){errEl.textContent='받을 사용자를 선택하세요.';errEl.style.display='block';return;}
+  // 1인당 금액 계산 (소수점 버림)
+  const perPerson=Math.floor(total/checked.length);
+  if(perPerson<=0){errEl.textContent=`인원(${checked.length}명) 대비 금액이 너무 적습니다. 최소 ${checked.length}${localDb.currency.symbol} 이상 입력하세요.`;errEl.style.display='block';return;}
+  const actualTotal=perPerson*checked.length;
+  const remainder=total-actualTotal; // 버림으로 생긴 잔액 → 중앙은행 환수
+  const cbBal=getCbBal();
+  if(cbBal!==Infinity&&cbBal<total){errEl.textContent=`중앙은행 잔액 부족 (필요: ${fmt(total,localDb.currency)}, 보유: ${fmt(cbBal,localDb.currency)})`;errEl.style.display='block';return;}
+  const upd={};
+  const ts=Date.now();
+  // 총액 차감 후 잔액(remainder)은 그대로 중앙은행에 남음
+  if(cbBal!==Infinity) upd[`users/${CB_UID}/balance`]=cbBal-actualTotal; // remainder는 차감 안 함
+  checked.forEach((uid,i)=>{
+    const u=localDb.users[uid]; if(!u)return;
+    const uBal=u.balance==='INF'?Infinity:Number(u.balance)||0;
+    if(uBal!==Infinity) upd[`users/${uid}/balance`]=uBal+perPerson;
+    upd[`users/${CB_UID}/transactions/${ts+i}_cbout_${uid}`]={type:'sent',to:uid,toCode:u.accountCode||'',amount:perPerson,memo,time:nowStr()};
+    upd[`users/${uid}/transactions/${ts+i}_cbin`]={type:'received',from:CB_UID,fromCode:'XTDC0001',amount:perPerson,memo,time:nowStr()};
+    if(uBal!==Infinity) localDb.users[uid].balance=uBal+perPerson;
+  });
+  // 잔액(버림) 환수 기록 (0이면 기록 안 함)
+  if(remainder>0){
+    upd[`users/${CB_UID}/transactions/${ts}_cbrem`]={type:'received',from:'SYSTEM',fromCode:'SYS',amount:remainder,memo:`다중송금 소수점 버림 환수 (${checked.length}명 분배 잔액)`,time:nowStr()};
+  }
+  await update(ref(db),upd);
+  if(cbBal!==Infinity) localDb.users[CB_UID].balance=cbBal-actualTotal;
+  document.getElementById('modal-cb-broadcast').classList.remove('open');
+  updateProfileCard();
+  const msg=remainder>0
+    ? `✅ ${checked.length}명에게 각 ${fmt(perPerson,localDb.currency)} 송금 완료!
+잔액 ${fmt(remainder,localDb.currency)}은 중앙은행으로 환수되었습니다.`
+    : `✅ ${checked.length}명에게 각 ${fmt(perPerson,localDb.currency)} 송금 완료!`;
+  alert(msg);
+};
+
+// ════════════════════════════
+// 압류
+// ════════════════════════════
+let seizingUserId=null;
+
+window.openSeizeModal=function(){
+  // transfer 페이지에서 계좌번호 입력 → 압류 모달
+  const code=document.getElementById('transfer-to')?.value?.toUpperCase().trim();
+  if(code){
+    const entry=Object.entries(localDb.users).find(([,v])=>v.accountCode===code);
+    if(entry){
+      seizingUserId=entry[0];
+      _showSeizeModal(entry[0],entry[1]);
+      return;
+    }
+  }
+  // transfer 페이지 없이 바로 열린 경우 - 계좌번호 입력 받기
+  const inputCode=prompt('압류할 계좌번호를 입력하세요:');
+  if(!inputCode)return;
+  const entry=Object.entries(localDb.users).find(([,v])=>v.accountCode===inputCode.toUpperCase().trim());
+  if(!entry){alert('존재하지 않는 계좌번호입니다.');return;}
+  seizingUserId=entry[0];
+  _showSeizeModal(entry[0],entry[1]);
+};
+
+function _showSeizeModal(uid,u){
+  const bal=u.balance==='INF'?'∞':fmt(u.balance,localDb.currency);
+  const seized=u.seized||0;
+  document.getElementById('seize-target-info').innerHTML=`
+    <b>${escHtml(uid)}</b> (${u.accountCode||''})<br>
+    현재 잔액: ${bal} ${seized>0?`· 기존 압류: <span class="seize-badge">${fmt(seized,localDb.currency)}</span>`:''}`;
+  document.getElementById('seize-amount').value='';
+  document.getElementById('seize-reason').value='';
+  document.getElementById('seize-err').style.display='none';
+  document.getElementById('modal-seize').classList.add('open');
+}
+
+window.doSeize=async function(){
+  const uid=seizingUserId; if(!uid)return;
+  const amt=Number(document.getElementById('seize-amount').value);
+  const reason=document.getElementById('seize-reason').value.trim()||'관리자 압류';
+  const errEl=document.getElementById('seize-err');
+  errEl.style.display='none';
+  if(!amt||amt<=0||!Number.isInteger(amt)){errEl.textContent='올바른 금액을 입력하세요.';errEl.style.display='block';return;}
+  const u=localDb.users[uid];
+  const bal=u.balance==='INF'?Infinity:Number(u.balance)||0;
+  // ★ 잔액 체크는 하지만 돈은 가져가지 않음 — seized 기록만 남김
+  if(bal!==Infinity&&bal<amt){errEl.textContent=`잔액 부족 (현재: ${fmt(bal,localDb.currency)})`;errEl.style.display='block';return;}
+  const prevSeized=Number(u.seized)||0;
+  const upd={};
+  // 잔액 그대로 유지 (돈 안 가져감)
+  upd[`users/${uid}/seized`]=prevSeized+amt;
+  upd[`users/${uid}/seizeReason`]=reason;
+  upd[`users/${uid}/transactions/${Date.now()}_seize`]={type:'confiscated',from:'ADMIN',fromCode:'ADMIN',amount:amt,memo:`압류 등록: ${reason} (이용 제한)`,time:nowStr()};
+  await update(ref(db),upd);
+  localDb.users[uid].seized=prevSeized+amt;
+  localDb.users[uid].seizeReason=reason;
+  document.getElementById('modal-seize').classList.remove('open');
+  showAdminMsg(`${uid} 압류 완료: ${fmt(amt,localDb.currency)} (이용 제한, 잔액 유지)`);
+};
+
+// 압류된 계정 - 행동 차단 팝업 + 납부 해제
+function checkSeized(){
+  if(!currentUser||isCentralBank()||isAdmin())return;
+  const u=user(); if(!u)return;
+  const seized=Number(u.seized)||0;
+  if(seized<=0){ removeSeizeOverlay(); return; }
+  const blockedPages=['transfer','stock','gambling','loan','election','history','balance'];
+  if(blockedPages.includes(currentPage)){
+    const reason=u.seizeReason||'관리자 지시';
+    removeSeizeOverlay(); // 기존 오버레이 제거 후 새로 생성
+    const div=document.createElement('div');
+    div.id='seize-overlay';
+    div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    div.innerHTML=`<div style="background:var(--surface);border:2px solid #ef4444;border-radius:16px;padding:24px;max-width:340px;width:100%;text-align:center">
+      <div style="font-size:36px;margin-bottom:10px">🔒</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:20px;color:#ef4444;margin-bottom:8px">계좌 압류 상태</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:4px">압류 금액: <b>${fmt(seized,localDb.currency)}</b></div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:16px">사유: ${escHtml(reason)}</div>
+      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:12px;margin-bottom:14px;text-align:left">
+        <div style="font-size:11px;font-weight:700;color:#ef4444;margin-bottom:8px">💸 압류금 납부하기</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">아래 금액을 납부하면 압류가 해제됩니다.</div>
+        <input type="number" id="seize-pay-input" placeholder="${seized}" value="${seized}" min="1" max="${seized}"
+          style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:13px;margin-bottom:8px;box-sizing:border-box">
+        <div id="seize-pay-err" style="color:#ef4444;font-size:11px;display:none;margin-bottom:6px"></div>
+        <button onclick="doSeizePay()" style="width:100%;padding:9px;border-radius:8px;background:linear-gradient(90deg,#ef4444,#dc2626);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer">납부하기</button>
+      </div>
+      <button onclick="removeSeizeOverlay()" style="width:100%;padding:9px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);font-size:12px;cursor:pointer">닫기 (압류 유지)</button>
+    </div>`;
+    document.body.appendChild(div);
+  }
+}
+
+function removeSeizeOverlay(){
+  const el=document.getElementById('seize-overlay'); if(el)el.remove();
+}
+
+// 압류금 납부 → 납부한 만큼 압류 해제
+window.doSeizePay=async function(){
+  const u=user(); if(!u)return;
+  const seized=Number(u.seized)||0;
+  if(seized<=0)return;
+  const payAmt=Number(document.getElementById('seize-pay-input')?.value)||0;
+  const errEl=document.getElementById('seize-pay-err');
+  if(errEl) errEl.style.display='none';
+  if(!payAmt||payAmt<=0||!Number.isInteger(payAmt)){
+    if(errEl){errEl.textContent='올바른 금액을 입력하세요.';errEl.style.display='block';} return;
+  }
+  if(payAmt>seized){
+    if(errEl){errEl.textContent=`압류 금액(${fmt(seized,localDb.currency)})을 초과할 수 없습니다.`;errEl.style.display='block';} return;
+  }
+  const bal=u.balance==='INF'?Infinity:Number(u.balance)||0;
+  if(bal!==Infinity&&bal<payAmt){
+    if(errEl){errEl.textContent=`잔액 부족 (보유: ${fmt(bal,localDb.currency)})`;errEl.style.display='block';} return;
+  }
+  const newSeized=seized-payAmt;
+  const upd={};
+  // 납부금 차감 → 중앙은행으로
+  if(bal!==Infinity) upd[`users/${currentUser}/balance`]=bal-payAmt;
+  upd[`users/${currentUser}/seized`]=newSeized;
+  if(newSeized===0){ upd[`users/${currentUser}/seizeReason`]=null; }
+  upd[`users/${currentUser}/transactions/${Date.now()}_seizepay`]={type:'sent',to:CB_UID,toCode:'XTDC0001',amount:payAmt,memo:'압류금 납부',time:nowStr()};
+  const cbBal=getCbBal();
+  if(cbBal!==Infinity) upd[`users/${CB_UID}/balance`]=cbBal+payAmt;
+  upd[`users/${CB_UID}/transactions/${Date.now()}_seizein`]={type:'received',from:currentUser,fromCode:u.accountCode||'',amount:payAmt,memo:`압류금 납부 수납 (${currentUser})`,time:nowStr()};
+  await update(ref(db),upd);
+  // localDb 갱신
+  if(bal!==Infinity) localDb.users[currentUser].balance=bal-payAmt;
+  localDb.users[currentUser].seized=newSeized;
+  if(newSeized===0) delete localDb.users[currentUser].seizeReason;
+  if(cbBal!==Infinity) localDb.users[CB_UID].balance=cbBal+payAmt;
+  updateProfileCard();
+  removeSeizeOverlay();
+  if(newSeized===0){
+    alert('✅ 압류금 납부 완료! 계좌 압류가 해제되었습니다.');
+  } else {
+    alert(`납부 완료. 남은 압류 금액: ${fmt(newSeized,localDb.currency)}`);
+    checkSeized(); // 남은 압류 있으면 다시 팝업
+  }
 };
 
 // ── HISTORY ──
@@ -1796,8 +2298,26 @@ function renderBalance(){
 }
 
 // ── ADMIN ──
+// CB 전용: 세금 섹션만 표시
+const CB_ONLY_SECTIONS=['admin-sec-subadmin','admin-sec-currency','admin-sec-users','admin-sec-notice','admin-sec-ad','admin-sec-stock','admin-sec-event','admin-election-section'];
+function applyCbAdminView(){
+  const isCB=isCentralBank();
+  CB_ONLY_SECTIONS.forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display=isCB?'none':'';
+  });
+  ['admin-notices','admin-ads'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display=isCB?'none':'';
+  });
+}
+
 function renderAdmin(){
   document.getElementById('currency-current').textContent=`현재: ${localDb.currency.symbol} (${localDb.currency.name})`;
+  applyCbAdminView();
+  if(isCentralBank()){
+    document.getElementById('admin-msg').style.display='none';
+    renderTaxSettings();
+    return;
+  }
   const subContent=document.getElementById('sub-admin-content');
   if(isSubAdmin()){
     subContent.innerHTML='<div class="err-msg">권한이 없습니다.</div>';
@@ -1808,7 +2328,7 @@ function renderAdmin(){
   }
   const tbody=document.getElementById('users-tbody');
   tbody.innerHTML=Object.entries(localDb.users).map(([id,u])=>{
-    const sid=id.replace(/'/g,"\\'");
+    const sid=id.replace(/'/g,"\'");
     const editBtn=isAdmin()&&id!=='admin'?`<button class="btn-icon" onclick="openChangeUid('${sid}')">✏️</button>`:'';
     const delBtn=isMod()&&id!=='admin'&&id!==currentUser?`<button class="btn-icon" onclick="openDeleteUser('${sid}')" style="color:#ef4444;font-weight:700">✕</button>`:'';
     const pwDisplay=(isSubAdmin()&&id==='admin')?'<span style="color:var(--text3);font-style:italic">비공개</span>':escHtml(u.password);
@@ -1818,6 +2338,7 @@ function renderAdmin(){
   document.getElementById('admin-msg').style.display='none';
   renderNoticeBanner('admin'); renderAdBanner('admin');
   renderAdminElectionList();
+  renderTaxSettings();
 }
 function showAdminMsg(msg,isErr=false){ const el=document.getElementById('admin-msg'); el.className=isErr?'err-msg':'ok-msg'; el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',3000); }
 window.doSubAdmin=async function(){
@@ -3323,13 +3844,21 @@ window.badukChoose = async function(choice) {
     const upd = {};
     if(curBal!==Infinity) upd[`users/${currentUser}/balance`] = curBal + payout;
     upd[`users/${currentUser}/transactions/${Date.now()}_badukwin`] = {type:'received',from:'BADUK',fromCode:'GAME',amount:payout,memo:`바둑알 홀짝 ${isOdd?'홀':'짝'} 정답`,time:nowStr()};
+    const btax=await applyTax(upd,currentUser,payout,'gambling','바둑알 홀짝');
+    if(btax>0) msgEl.innerHTML+=` <span style="color:var(--text3);font-size:11px">(세금 ${fmt(btax,localDb.currency)})</span>`;
     await update(ref(db), upd);
-    if(upd[`users/${currentUser}/balance`]!==undefined){
-      localDb.users[currentUser].balance = upd[`users/${currentUser}/balance`];
-      updateProfileCard();
-    }
+    if(upd[`users/${currentUser}/balance`]!==undefined) localDb.users[currentUser].balance = upd[`users/${currentUser}/balance`];
+    if(localDb.users[CB_UID]&&upd[`users/${CB_UID}/balance`]!==undefined) localDb.users[CB_UID].balance=upd[`users/${CB_UID}/balance`];
+    updateProfileCard();
   } else {
     msgEl.innerHTML = `<span style="color:#ef4444">😢 틀렸습니다. (${choice==='odd'?'홀':'짝'} 선택, ${isOdd?'홀수':'짝수'})</span>`;
+    // 패배금 → 중앙은행
+    const cbB=getCbBal();
+    const lossUpd={};
+    if(cbB!==Infinity) lossUpd[`users/${CB_UID}/balance`]=cbB+badukBetAmount;
+    lossUpd[`users/${CB_UID}/transactions/${Date.now()}_baduklose`]={type:'received',from:currentUser,fromCode:localDb.users[currentUser]?.accountCode||'',amount:badukBetAmount,memo:'바둑알 홀짝 도박 수익',time:nowStr()};
+    await update(ref(db),lossUpd);
+    if(cbB!==Infinity) localDb.users[CB_UID].balance=cbB+badukBetAmount;
   }
 };
 
@@ -3528,6 +4057,7 @@ function renderStockMarketTab(){
   }).join('');
   renderActiveEventBanner();
   renderIpoBanners();
+  insertMarketStatusBanner();
 }
 
 function fmtCompact(n){
@@ -3604,10 +4134,25 @@ function renderStockEventsTab(){
 async function renderStockPortfolioTab(){
   const el=document.getElementById('stock-portfolio-content'); if(!el)return;
   if(!currentUser){el.innerHTML='<div class="empty-state">로그인 후 이용하세요.</div>';return;}
-  const snap=await get(r('stockPortfolio',currentUser));
-  const portfolio=snap.val()||{};
+
+  const [portfolioSnap, txSnap] = await Promise.all([
+    get(r('stockPortfolio',currentUser)),
+    get(r('stockTransactions',currentUser))
+  ]);
+  const portfolio=portfolioSnap.val()||{};
+  const txAll=Object.values(txSnap.val()||{});
+
+  // ── 실현손익 계산 (매도 수익 - 해당 주식 평균매수가 기반) ──
+  // buy tx: 투자 원금 누적 / sell tx: 회수금 누적
+  let totalBought=0, totalSold=0;
+  txAll.forEach(tx=>{
+    if(tx.type==='buy') totalBought+=Number(tx.totalAmount)||0;
+    if(tx.type==='sell') totalSold+=Number(tx.totalAmount)||0;
+  });
+
   const entries=Object.entries(portfolio);
-  if(!entries.length){el.innerHTML='<div class="empty-state">보유 중인 주식이 없습니다.</div>';return;}
+
+  // ── 현재 평가손익 ──
   let totalEval=0, totalInvest=0;
   const rows=entries.map(([sym,p])=>{
     const s=localDb.stocks[sym]; if(!s)return '';
@@ -3632,15 +4177,48 @@ async function renderStockPortfolioTab(){
       <button class="btn-sm btn-danger" onclick="openStockDetail('${sym}')" style="margin-top:8px;width:100%">매도하러 가기</button>
     </div>`;
   }).join('');
-  const totalProfit=totalEval-totalInvest;
-  const totalProfitP=totalInvest?(totalProfit/totalInvest*100).toFixed(2):'0.00';
-  const cls=totalProfit>=0?'portfolio-profit-up':'portfolio-profit-down';
-  const sign=totalProfit>=0?'+':'';
-  el.innerHTML=`<div class="portfolio-summary">
-    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">총 평가액</div>
-    <div class="portfolio-total">${fmt(totalEval,localDb.currency)}</div>
-    <div class="${cls}" style="margin-top:4px">${sign}${fmt(totalProfit,localDb.currency)} (${sign}${totalProfitP}%)</div>
-  </div>${rows}`;
+
+  // 평가손익 (현재 보유분)
+  const unrealized=totalEval-totalInvest;
+  const unrealizedP=totalInvest?(unrealized/totalInvest*100).toFixed(2):'0.00';
+  const uCls=unrealized>=0?'portfolio-profit-up':'portfolio-profit-down';
+  const uSign=unrealized>=0?'+':'';
+
+  // 누적 총손익 = (매도 회수금 - 매도분 원가) + 현재 평가손익
+  // = totalSold - (totalBought - totalInvest) + unrealized
+  // = totalSold - totalBought + totalInvest + unrealized
+  const realizedBase = totalBought - totalInvest; // 이미 매도된 것들의 원가
+  const realized = totalSold - realizedBase;       // 실현손익
+  const totalNet = realized + unrealized;           // 누적 총손익
+  const tSign=totalNet>=0?'+':'';
+  const tCls=totalNet>=0?'portfolio-profit-up':'portfolio-profit-down';
+  const rSign=realized>=0?'+':'';
+  const rCls=realized>=0?'portfolio-profit-up':'portfolio-profit-down';
+
+  const noHolding = entries.length === 0;
+
+  el.innerHTML=`
+    <div class="portfolio-summary">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">총 평가액</div>
+      <div class="portfolio-total">${fmt(totalEval,localDb.currency)}</div>
+      <div class="${uCls}" style="margin-top:4px">${uSign}${fmt(unrealized,localDb.currency)} (${uSign}${unrealizedP}%)</div>
+    </div>
+    ${noHolding ? '<div class="empty-state">보유 중인 주식이 없습니다.</div>' : rows}
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📊 누적 손익 (전체)</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--text3)">실현손익 (매도 완료)</span>
+        <span class="${rCls}" style="font-size:13px;font-weight:700">${rSign}${fmt(realized,localDb.currency)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--text3)">평가손익 (보유중)</span>
+        <span class="${uCls}" style="font-size:13px;font-weight:700">${uSign}${fmt(unrealized,localDb.currency)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 0">
+        <span style="font-size:13px;font-weight:700;color:var(--text)">총 손익</span>
+        <span class="${tCls}" style="font-size:17px;font-weight:800">${tSign}${fmt(totalNet,localDb.currency)}</span>
+      </div>
+    </div>`;
 }
 
 // ── 종목 상세 ──
@@ -4508,6 +5086,183 @@ window.stockDetailRefresh=async function(){
 };
 
 // ── 평상시 랜덤 가격 변동 ──
+// ════════════════════════════
+// 주식 장시간 (07:00~01:00)
+// ════════════════════════════
+function isMarketOpen(){
+  const h=new Date().getHours();
+  // 07:00 이상 OR 01:00 미만 → open (즉 01:00~06:59 → closed)
+  return h>=7||h<1;
+}
+
+function getMarketStatusHtml(){
+  if(isMarketOpen()){
+    return `<div class="market-closed-banner"><span class="market-open-label">🟢 장 운영중</span><span style="font-size:11px;color:var(--text3)">07:00 ~ 익일 01:00</span></div>`;
+  }
+  const now=new Date();
+  const openTime=new Date(now);
+  openTime.setHours(7,0,0,0);
+  if(openTime<=now) openTime.setDate(openTime.getDate()+1);
+  const diffMs=openTime-now;
+  const diffH=Math.floor(diffMs/3600000);
+  const diffM=Math.floor((diffMs%3600000)/60000);
+  return `<div class="market-closed-banner"><span class="market-closed-label">🔴 장 마감</span><span style="font-size:11px;color:var(--text3)">오전 7시 오픈 (${diffH}시간 ${diffM}분 후)</span></div>`;
+}
+
+// renderStockMarketTab 호출 후 장시간 배너 삽입 (별도 함수로 분리)
+function insertMarketStatusBanner(){
+  const ipoBanners=document.getElementById('stock-ipo-banners');
+  if(ipoBanners){
+    const existing=document.getElementById('market-status-banner');
+    if(existing) existing.remove();
+    const div=document.createElement('div');
+    div.id='market-status-banner';
+    div.innerHTML=getMarketStatusHtml();
+    ipoBanners.parentNode.insertBefore(div,ipoBanners);
+  }
+}
+
+// 매매 시도 시 장 마감 여부 체크
+const _origDoBankTrade=window.doBankTrade;
+window.doBankTrade=async function(type){
+  if(!isMarketOpen()){
+    const errId=type==='buy'?'trade-err':'trade-err2';
+    const errEl=document.getElementById(errId);
+    if(errEl){errEl.textContent='🔴 장 마감 중입니다. 오전 7시에 다시 시도해주세요.';errEl.style.display='block';}
+    return;
+  }
+  return _origDoBankTrade(type);
+};
+const _origDoUserOrder=window.doUserOrder;
+window.doUserOrder=async function(type){
+  if(!isMarketOpen()){
+    const errId=type==='buy'?'utrade-err':'utrade-err2';
+    const errEl=document.getElementById(errId);
+    if(errEl){errEl.textContent='🔴 장 마감 중입니다. 오전 7시에 다시 시도해주세요.';errEl.style.display='block';}
+    return;
+  }
+  return _origDoUserOrder(type);
+};
+
+// ════════════════════════════
+// 가위바위보 (RPS)
+// ════════════════════════════
+let rpsBetAmount=0;
+const RPS_EMOJI={scissors:'✂️',rock:'✊',paper:'🖐'};
+const RPS_LABEL={scissors:'가위',rock:'바위',paper:'보'};
+// 승패 판정: 1=내가 이김, 0=비김, -1=내가 짐
+function rpsResult(me,cpu){
+  if(me===cpu) return 0;
+  if((me==='scissors'&&cpu==='paper')||(me==='rock'&&cpu==='scissors')||(me==='paper'&&cpu==='rock')) return 1;
+  return -1;
+}
+const RPS_CHOICES=['scissors','rock','paper'];
+
+window.showRpsGame=function(){
+  document.getElementById('gamble-prob-list').querySelector('.prob-game-list').style.display='none';
+  document.getElementById('rps-game-view').style.display='block';
+  resetRpsGame();
+};
+window.closeRpsGame=function(){
+  document.getElementById('rps-game-view').style.display='none';
+  document.getElementById('gamble-prob-list').querySelector('.prob-game-list').style.display='';
+};
+window.resetRpsGame=function(){
+  ['rps-phase-bet','rps-phase-choose','rps-phase-battle','rps-phase-result'].forEach((id,i)=>{
+    const el=document.getElementById(id); if(el) el.style.display=i===0?'':'none';
+  });
+  document.getElementById('rps-bet-input').value='';
+  document.getElementById('rps-bet-err').style.display='none';
+  rpsBetAmount=0;
+};
+
+window.startRpsGame=async function(){
+  const amt=Number(document.getElementById('rps-bet-input').value);
+  const errEl=document.getElementById('rps-bet-err');
+  errEl.style.display='none';
+  if(!amt||!Number.isInteger(amt)||amt<=0){errEl.textContent='유효한 금액을 입력하세요.';errEl.style.display='block';return;}
+  if(!currentUser){errEl.textContent='로그인이 필요합니다.';errEl.style.display='block';return;}
+  const u=user();
+  const curBal=u.balance==='INF'?Infinity:Number(u.balance);
+  if(curBal!==Infinity&&amt>curBal){errEl.textContent='잔액이 부족합니다.';errEl.style.display='block';return;}
+  rpsBetAmount=amt;
+  // 베팅금 선차감
+  const upd={};
+  if(curBal!==Infinity) upd[`users/${currentUser}/balance`]=curBal-amt;
+  upd[`users/${currentUser}/transactions/${Date.now()}_rpsbet`]={type:'sent',to:'RPS',toCode:'GAME',amount:amt,memo:'가위바위보 베팅',time:nowStr()};
+  await update(ref(db),upd);
+  if(upd[`users/${currentUser}/balance`]!==undefined){
+    localDb.users[currentUser].balance=upd[`users/${currentUser}/balance`];
+    updateProfileCard();
+  }
+  document.getElementById('rps-phase-bet').style.display='none';
+  document.getElementById('rps-phase-choose').style.display='';
+};
+
+window.doRpsChoose=async function(myChoice){
+  // 선택 버튼 비활성화
+  document.getElementById('rps-phase-choose').style.display='none';
+  document.getElementById('rps-phase-battle').style.display='';
+  // 내 선택 보여주기
+  document.getElementById('rps-my-hand').textContent=RPS_EMOJI[myChoice];
+  document.getElementById('rps-cpu-hand').textContent='✊'; // 대기 중
+  // 1.2초 애니메이션 후 결과
+  await new Promise(res=>setTimeout(res,1200));
+  // CPU 랜덤 선택
+  const cpuChoice=RPS_CHOICES[Math.floor(Math.random()*3)];
+  const result=rpsResult(myChoice,cpuChoice);
+  // 결과 화면
+  document.getElementById('rps-phase-battle').style.display='none';
+  document.getElementById('rps-phase-result').style.display='';
+  document.getElementById('rps-result-my-hand').textContent=RPS_EMOJI[myChoice];
+  document.getElementById('rps-result-cpu-hand').textContent=RPS_EMOJI[cpuChoice];
+  const titleEl=document.getElementById('rps-result-title');
+  const msgEl=document.getElementById('rps-result-msg');
+  const u=user();
+  const curBal=u.balance==='INF'?Infinity:Number(u.balance);
+  const upd={};
+  if(result===1){
+    // 승리: 3배
+    const payout=Math.floor(rpsBetAmount*1.5);
+    titleEl.textContent='🏆 승리!';
+    titleEl.style.color='#22c55e';
+    msgEl.textContent=`${RPS_LABEL[myChoice]} vs ${RPS_LABEL[cpuChoice]} · +${fmt(payout,localDb.currency)}`;
+    if(curBal!==Infinity) upd[`users/${currentUser}/balance`]=curBal+payout;
+    upd[`users/${currentUser}/transactions/${Date.now()}_rpswin`]={type:'received',from:'RPS',fromCode:'GAME',amount:payout,memo:`가위바위보 승리 (${RPS_LABEL[myChoice]} vs ${RPS_LABEL[cpuChoice]})`,time:nowStr()};
+  } else if(result===0){
+    // 비김: 0.75배 (베팅금의 75% 돌려받음)
+    const payout=Math.floor(rpsBetAmount*0.75);
+    titleEl.textContent='🤝 비김';
+    titleEl.style.color='#f59e0b';
+    msgEl.textContent=`${RPS_LABEL[myChoice]} vs ${RPS_LABEL[cpuChoice]} · ${fmt(payout,localDb.currency)} 환급`;
+    if(curBal!==Infinity) upd[`users/${currentUser}/balance`]=curBal+payout;
+    upd[`users/${currentUser}/transactions/${Date.now()}_rpsdraw`]={type:'received',from:'RPS',fromCode:'GAME',amount:payout,memo:`가위바위보 비김 환급 (${RPS_LABEL[myChoice]} vs ${RPS_LABEL[cpuChoice]})`,time:nowStr()};
+  } else {
+    // 패배 → 베팅금 중앙은행으로
+    titleEl.textContent='😢 패배';
+    titleEl.style.color='#ef4444';
+    msgEl.textContent=`${RPS_LABEL[myChoice]} vs ${RPS_LABEL[cpuChoice]} · -${fmt(rpsBetAmount,localDb.currency)}`;
+    const cbBal=getCbBal();
+    if(cbBal!==Infinity) upd[`users/${CB_UID}/balance`]=cbBal+rpsBetAmount;
+    upd[`users/${CB_UID}/transactions/${Date.now()}_rpsloss`]={type:'received',from:currentUser,fromCode:localDb.users[currentUser]?.accountCode||'',amount:rpsBetAmount,memo:'가위바위보 도박 수익',time:nowStr()};
+  }
+  if(Object.keys(upd).length){
+    // 도박세 적용 (승리/비김 시)
+    if(result>=0){
+      const taxAmt=await applyTax(upd,currentUser,result===1?Math.floor(rpsBetAmount*1.5):Math.floor(rpsBetAmount*0.75),'gambling','가위바위보');
+      if(taxAmt>0) msgEl.textContent+= ` (세금 ${fmt(taxAmt,localDb.currency)} 납부)`;
+    }
+    await update(ref(db),upd);
+    if(upd[`users/${currentUser}/balance`]!==undefined){
+      localDb.users[currentUser].balance=upd[`users/${currentUser}/balance`];
+    }
+    if(localDb.users[CB_UID]&&upd[`users/${CB_UID}/balance`]!==undefined){
+      localDb.users[CB_UID].balance=upd[`users/${CB_UID}/balance`];
+    }
+    updateProfileCard();
+  }
+};
+
 function startStockPriceTimer(){
   if(stockPriceTimer) clearInterval(stockPriceTimer);
   // 이벤트 가격 적용만 유지 (랜덤 변동 제거)
